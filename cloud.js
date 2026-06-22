@@ -18,12 +18,12 @@
    ===================================================================== */
 
 const FIREBASE_CONFIG = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_AUTH_DOMAIN",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_STORAGE_BUCKET",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID",
+  apiKey: "AIzaSyDcP0QmPEW1F5Dsz-Fw9yRlwNRvbydqqmE",
+  authDomain: "chris-os-web.firebaseapp.com",
+  projectId: "chris-os-web",
+  storageBucket: "chris-os-web.firebasestorage.app",
+  messagingSenderId: "938683267571",
+  appId: "1:938683267571:web:d5273f9d2ff4d9085a3a86",
 };
 
 const app = window.CGL_APP;
