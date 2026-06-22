@@ -242,7 +242,7 @@ function loadState(){
   setSave("saved");
 }
 function scheduleSave(){setSave("saving");clearTimeout(saveTimer);saveTimer=setTimeout(doSave,400);}
-function doSave(){if(!canStore){setSave("in memory");return;}try{localStorage.setItem(KEY,JSON.stringify(state));setSave("saved");}catch(e){setSave("export to keep");}}
+function doSave(){if(canStore){try{localStorage.setItem(KEY,JSON.stringify(state));setSave("saved");}catch(e){setSave("export to keep");}}else{setSave("in memory");}if(window.CGLCloud&&window.CGLCloud.active)window.CGLCloud.cloudSave(state);}
 function setSave(t){const el=document.getElementById("saveDot");el.textContent=t;el.classList.toggle("live",t==="saved"||t==="saving");}
 
 /* ---------- time helpers ---------- */
@@ -453,7 +453,7 @@ function download(name,content,mime){const blob=new Blob([content],{type:mime});
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700);}
 
 /* ---------- boot ---------- */
-(function init(){
+function bootLocal(){
   loadState();
   const today=JS_DAY[new Date().getDay()];
   const empty=DAYS.every(d=>!(state.days[d]||[]).length);
@@ -462,8 +462,21 @@ function toast(m){const t=document.getElementById("toast");t.textContent=m;t.cla
   }
   if(!state.view||!DAYS.includes(state.view)) state.view=today;
   renderTabs(); renderTimeline();
-  setInterval(markNow,30000);
-})();
+}
+function hydrate(remote){
+  if(remote && remote.days){
+    state = remote;
+    DAYS.forEach(d=>{ if(!Array.isArray(state.days[d])) state.days[d]=[]; });
+    let mx=0;DAYS.forEach(d=>(state.days[d]||[]).forEach(b=>{const n=parseInt((b.id||"").replace(/\D/g,""))||0;mx=Math.max(mx,n);}));
+    nextId=mx+1;
+    const today=JS_DAY[new Date().getDay()];
+    if(!state.view||!DAYS.includes(state.view)) state.view=today;
+  }
+  renderTabs(); renderTimeline();
+}
+window.CGL_APP = { docId:"routine", bootLocal, hydrate, getState:()=>state, setStatus:setSave };
+setInterval(markNow,30000);
 </script>
+<script type="module" src="/cloud.js"></script>
 </body>
 </html>

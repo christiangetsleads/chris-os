@@ -219,9 +219,11 @@ function scheduleSave(){
   saveTimer = setTimeout(doSave, 400);
 }
 function doSave(){
-  if(!canStore){ setSave("in memory"); return; }
-  try{ localStorage.setItem(KEY, JSON.stringify(state)); setSave("saved"); }
-  catch(e){ setSave("export to keep"); }
+  if(canStore){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); setSave("saved"); }
+    catch(e){ setSave("export to keep"); }
+  } else { setSave("in memory"); }
+  if(window.CGLCloud && window.CGLCloud.active) window.CGLCloud.cloudSave(state);
 }
 function setSave(t){
   const el = document.getElementById("saveDot");
@@ -453,12 +455,23 @@ function syncUI(){
   document.getElementById("weekIn").value=state.week||"";
   document.querySelectorAll("#volToggle button").forEach(x=>x.classList.toggle("on",x.dataset.vol===state.volume));
 }
-(function init(){
+function bootLocal(){
   loadState();
   if(!state.pieces.length){ SKELETON.forEach(s=>state.pieces.push(newPiece({...s,open:false}))); }
   syncUI();
   renderBoard();
-})();
+}
+function hydrate(remote){
+  if(remote && Array.isArray(remote.pieces)){
+    state = remote;
+    const maxN = state.pieces.reduce((m,p)=>{const n=parseInt((p.id||"").replace(/\D/g,""))||0;return Math.max(m,n);},0);
+    nextId = maxN+1;
+  }
+  syncUI();
+  renderBoard();
+}
+window.CGL_APP = { docId:"planner", bootLocal, hydrate, getState:()=>state, setStatus:setSave };
 </script>
+<script type="module" src="/cloud.js"></script>
 </body>
 </html>
