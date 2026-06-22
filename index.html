@@ -245,5 +245,10 @@
     },1650);
   }
 </script>
+<script>
+  /* Landing page only needs the login gate — no data to sync. */
+  window.CGL_APP = { gateOnly:true, bootLocal:function(){}, hydrate:function(){}, getState:function(){return{};}, setStatus:function(){} };
+</script>
+<script type="module" src="/cloud.js"></script>
 </body>
 </html>

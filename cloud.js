@@ -32,6 +32,7 @@ if (!app) {
 }
 
 const CONFIGURED = app && !String(FIREBASE_CONFIG.apiKey).startsWith("PASTE_");
+let signInHandler = null;
 
 /* ---------- LOCAL-ONLY MODE (Firebase not configured yet) ---------- */
 if (app && !CONFIGURED) {
@@ -40,13 +41,17 @@ if (app && !CONFIGURED) {
 
 /* ---------- CLOUD MODE ---------- */
 if (CONFIGURED) {
-  bootCloud().catch((err) => {
+  // Show the gate immediately so no page content flashes before login.
+  const gate = buildGate(() => { if (signInHandler) signInHandler(); });
+  gate.show();
+  bootCloud(gate).catch((err) => {
     console.error("[cloud] init failed, falling back to local:", err);
+    gate.hide();
     app.bootLocal();
   });
 }
 
-async function bootCloud() {
+async function bootCloud(gate) {
   const V = "10.12.2";
   const [{ initializeApp }, authMod, fsMod] = await Promise.all([
     import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`),
@@ -66,7 +71,7 @@ async function bootCloud() {
   const provider = new GoogleAuthProvider();
   await setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-  const gate = buildGate(onSignInClick);
+  signInHandler = onSignInClick; // gate button is live now that auth is ready
   let booted = false;
   let saveTimer = null;
 
@@ -103,8 +108,8 @@ async function bootCloud() {
       return;
     }
     gate.hide();
-    gate.setSignedIn(user);
-    if (booted) return; // ignore token refreshes after first boot
+    if (app.gateOnly) return;       // homepage: just reveal the deck, nothing to sync
+    if (booted) return;             // ignore token refreshes after first boot
     booted = true;
 
     try {
