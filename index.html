@@ -135,11 +135,16 @@
   @keyframes load{to{width:100%;}}
 
   @media (max-width:780px){
+    /* let the deck grow and the page scroll on phones */
+    html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .deck{height:auto;min-height:100vh;overflow:visible;}
+    /* keep the background art pinned to the viewport while content scrolls */
+    .grid,.coreglow,.scan,.lines{position:fixed;}
     .modules{grid-template-columns:1fr;max-width:420px;}
     .mod{min-height:auto;}
     .sysline{gap:14px;}
     .statusbar{padding:16px 20px;}
-    .stage{padding:6px 20px 20px;}
+    .stage{padding:6px 20px 32px;}
   }
   @media (prefers-reduced-motion:reduce){
     .grid,.coreglow,.scan,.dot,.bars i,.mod,.mod::before{animation:none!important;transition:none!important;}
