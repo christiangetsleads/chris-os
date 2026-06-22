@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRIS·OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0C11; --bg2:#0F121A; --panel:#141826;
+    --gold:#E6B84D; --goldglow:rgba(230,184,77,.55);
+    --cyan:#34D6D0; --coral:#FF7A52;
+    --text:#E9E7DF; --muted:#7E8597; --line:rgba(230,184,77,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:"Space Mono",monospace;
+    overflow:hidden;-webkit-font-smoothing:antialiased;
+  }
+  a{text-decoration:none;color:inherit;}
+
+  .deck{position:relative;height:100vh;width:100vw;overflow:hidden;display:flex;flex-direction:column;}
+
+  /* ---- background layers ---- */
+  .grid{position:absolute;inset:-50%;
+    background-image:
+      linear-gradient(rgba(230,184,77,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(230,184,77,.045) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse 60% 60% at 50% 45%,#000 0%,transparent 78%);
+    mask-image:radial-gradient(ellipse 60% 60% at 50% 45%,#000 0%,transparent 78%);
+    animation:drift 26s linear infinite;z-index:0;}
+  @keyframes drift{to{transform:translate(46px,46px);}}
+  .coreglow{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:900px;height:900px;border-radius:50%;z-index:0;pointer-events:none;
+    background:radial-gradient(circle,rgba(230,184,77,.10) 0%,rgba(52,214,208,.05) 34%,transparent 62%);
+    animation:breathe 7s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:.7;}50%{opacity:1;}}
+  .scan{position:absolute;left:0;right:0;height:140px;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(52,214,208,.05),transparent);
+    animation:sweep 6.5s linear infinite;}
+  @keyframes sweep{0%{top:-160px;}100%{top:100%;}}
+  .lines{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.35;
+    background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.20) 3px 4px);}
+
+  /* ---- HUD corner brackets ---- */
+  .bk{position:absolute;width:26px;height:26px;border-color:var(--gold);z-index:5;opacity:.7;}
+  .bk.tl{top:16px;left:16px;border-top:2px solid;border-left:2px solid;}
+  .bk.tr{top:16px;right:16px;border-top:2px solid;border-right:2px solid;}
+  .bk.bl{bottom:16px;left:16px;border-bottom:2px solid;border-left:2px solid;}
+  .bk.br{bottom:16px;right:16px;border-bottom:2px solid;border-right:2px solid;}
+
+  /* ---- status bar ---- */
+  .statusbar{position:relative;z-index:6;display:flex;justify-content:space-between;align-items:center;
+    padding:20px 30px;gap:16px;flex-wrap:wrap;}
+  .brand{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:20px;letter-spacing:.32em;color:var(--text);}
+  .brand b{color:var(--gold);}
+  .brand .v{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:.2em;margin-left:10px;}
+  .sysline{display:flex;align-items:center;gap:22px;font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+  .stat{display:flex;align-items:center;gap:7px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 9px var(--cyan);animation:blink 2.2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .clock{font-family:"Chakra Petch",sans-serif;font-weight:600;color:var(--text);font-size:14px;letter-spacing:.1em;}
+  .bars{display:flex;gap:3px;align-items:flex-end;height:13px;}
+  .bars i{width:3px;background:var(--gold);opacity:.5;animation:eq 1.1s ease-in-out infinite;}
+  .bars i:nth-child(1){height:5px;animation-delay:0s;}
+  .bars i:nth-child(2){height:9px;animation-delay:.15s;}
+  .bars i:nth-child(3){height:13px;animation-delay:.3s;}
+  .bars i:nth-child(4){height:7px;animation-delay:.45s;}
+  @keyframes eq{0%,100%{transform:scaleY(.5);opacity:.4;}50%{transform:scaleY(1);opacity:.9;}}
+
+  /* ---- stage ---- */
+  .stage{position:relative;z-index:6;flex:1;display:flex;flex-direction:column;justify-content:center;
+    padding:10px 30px 30px;}
+  .lead{text-align:center;margin-bottom:34px;}
+  .lead .kicker{font-size:11px;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;}
+  .lead h1{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:clamp(30px,5vw,54px);
+    letter-spacing:.02em;margin-top:12px;line-height:1.02;}
+  .lead h1 .dim{color:#3A3F4D;}
+  .lead p{color:var(--muted);font-size:13px;letter-spacing:.06em;margin-top:14px;}
+
+  .modules{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1080px;width:100%;margin:0 auto;}
+  .mod{position:relative;background:linear-gradient(160deg,var(--panel),rgba(10,12,17,.6));
+    border:1px solid var(--line);border-radius:14px;padding:26px 24px 22px;overflow:hidden;
+    display:flex;flex-direction:column;min-height:240px;
+    border-top:2px solid var(--c);
+    transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+    opacity:0;transform:translateY(26px);}
+  body.ready .mod{opacity:1;transform:translateY(0);}
+  body.ready .mod:nth-child(1){transition-delay:.05s;}
+  body.ready .mod:nth-child(2){transition-delay:.18s;}
+  body.ready .mod:nth-child(3){transition-delay:.31s;}
+  .mod::before{content:"";position:absolute;top:0;left:-60%;width:55%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);
+    transition:left .5s ease;}
+  .mod:hover,.mod:focus-visible{transform:translateY(-7px);border-color:var(--c);
+    box-shadow:0 0 0 1px var(--c),0 16px 40px -12px var(--cglow),0 0 50px -18px var(--cglow);outline:none;}
+  .mod:hover::before{left:120%;}
+  .mod .no{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:13px;color:var(--c);letter-spacing:.2em;}
+  .mod .ic{margin:14px 0 4px;color:var(--c);}
+  .mod .ic svg{width:40px;height:40px;filter:drop-shadow(0 0 8px var(--cglow));}
+  .mod h2{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:23px;letter-spacing:.01em;margin-top:10px;}
+  .mod .desc{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:9px;flex:1;}
+  .mod .launch{display:flex;align-items:center;gap:9px;margin-top:16px;
+    font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--text);}
+  .mod .launch .arr{color:var(--c);transition:transform .2s ease;}
+  .mod:hover .launch .arr{transform:translateX(6px);}
+  .mod .tag{position:absolute;top:22px;right:22px;font-size:9.5px;letter-spacing:.16em;color:var(--muted);
+    border:1px solid var(--line);border-radius:5px;padding:3px 7px;text-transform:uppercase;}
+
+  .m-routine{--c:var(--cyan);--cglow:rgba(52,214,208,.5);}
+  .m-planner{--c:var(--gold);--cglow:rgba(230,184,77,.5);}
+  .m-playbook{--c:var(--coral);--cglow:rgba(255,122,82,.5);}
+
+  /* ---- footer telemetry ---- */
+  .telemetry{position:relative;z-index:6;display:flex;justify-content:space-between;align-items:center;
+    padding:16px 30px;border-top:1px solid var(--line);font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;flex-wrap:wrap;gap:10px;}
+  .telemetry .pillars span{color:var(--gold);}
+
+  /* ---- boot overlay ---- */
+  .boot{position:fixed;inset:0;z-index:50;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    transition:opacity .5s ease;}
+  .boot.gone{opacity:0;pointer-events:none;}
+  .boot .logo{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:clamp(34px,8vw,68px);letter-spacing:.3em;}
+  .boot .logo b{color:var(--gold);}
+  .boot .lines2{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;min-height:60px;text-align:center;line-height:2;}
+  .boot .lines2 .ok{color:var(--cyan);}
+  .boot .barwrap{width:min(320px,70vw);height:3px;background:rgba(230,184,77,.15);border-radius:3px;overflow:hidden;margin-top:6px;}
+  .boot .barfill{height:100%;width:0;background:var(--gold);box-shadow:0 0 12px var(--goldglow);animation:load 1.5s ease forwards;}
+  @keyframes load{to{width:100%;}}
+
+  @media (max-width:780px){
+    .modules{grid-template-columns:1fr;max-width:420px;}
+    .mod{min-height:auto;}
+    .sysline{gap:14px;}
+    .statusbar{padding:16px 20px;}
+    .stage{padding:6px 20px 20px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .grid,.coreglow,.scan,.dot,.bars i,.mod,.mod::before{animation:none!important;transition:none!important;}
+    .mod{opacity:1;transform:none;}
+    .boot{display:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="boot" id="boot">
+    <div class="logo">CHRIS<b>·</b>OS</div>
+    <div class="lines2" id="bootlines"></div>
+    <div class="barwrap"><div class="barfill"></div></div>
+  </div>
+
+  <div class="deck">
+    <div class="grid"></div>
+    <div class="coreglow"></div>
+    <div class="scan"></div>
+    <div class="lines"></div>
+    <span class="bk tl"></span><span class="bk tr"></span><span class="bk bl"></span><span class="bk br"></span>
+
+    <header class="statusbar">
+      <div class="brand">CHRIS<b>·</b>OS<span class="v">v1.0</span></div>
+      <div class="sysline">
+        <span class="stat"><span class="bars"><i></i><i></i><i></i><i></i></span> SYNC</span>
+        <span class="stat clock" id="clock">00:00:00</span>
+        <span class="stat" id="date">———</span>
+        <span class="stat"><span class="dot"></span> All Systems Online</span>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div class="lead">
+        <div class="kicker">Operator Deck</div>
+        <h1>Run the day. <span class="dim">Decide nothing twice.</span></h1>
+        <p>Select a module to launch</p>
+      </div>
+
+      <nav class="modules">
+        <a class="mod m-routine" href="/routine/">
+          <span class="tag">Live</span>
+          <div class="no">01</div>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3.5l2-7 4.5 14 2.5-9 1.5 2H22"/></svg></div>
+          <h2>Routine</h2>
+          <div class="desc">Your day, wake to sleep, every block decided in advance. Live readout of what to run right now.</div>
+          <div class="launch">Launch <span class="arr">▶</span></div>
+        </a>
+
+        <a class="mod m-planner" href="/planner/">
+          <span class="tag">Live</span>
+          <div class="no">02</div>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1.5"/><rect x="3" y="11" width="12" height="3.2" rx="1"/><rect x="3" y="16.5" width="18" height="3.2" rx="1"/></svg></div>
+          <h2>Planner</h2>
+          <div class="desc">Script the week and stay locked to the sixty fifteen thirteen twelve mix with a live ratio tracker.</div>
+          <div class="launch">Launch <span class="arr">▶</span></div>
+        </a>
+
+        <a class="mod m-playbook" href="/playbook/">
+          <span class="tag">Doctrine</span>
+          <div class="no">03</div>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 1.5V5M12 19v3.5M1.5 12H5M19 12h3.5"/></svg></div>
+          <h2>Playbook</h2>
+          <div class="desc">The content mix and the guardrails that keep lead gen the spine of everything you post.</div>
+          <div class="launch">Launch <span class="arr">▶</span></div>
+        </a>
+      </nav>
+    </main>
+
+    <footer class="telemetry">
+      <div>STATUS: <span style="color:var(--cyan)">OPERATIONAL</span></div>
+      <div class="pillars">PILLARS <span>FAITH · FAMILY · FITNESS · WORK</span></div>
+      <div>BUILT ONCE · EXECUTED DAILY</div>
+    </footer>
+  </div>
+
+<script>
+  function pad(n){return String(n).padStart(2,"0");}
+  function tick(){
+    const d=new Date();
+    const c=document.getElementById("clock");
+    if(c) c.textContent=pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+    const dt=document.getElementById("date");
+    if(dt) dt.textContent=d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}).toUpperCase();
+  }
+  tick(); setInterval(tick,1000);
+
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce){ document.body.classList.add("ready"); }
+  else{
+    const lines=["INITIALIZING CORE","MOUNTING MODULES","SYNCING PILLARS",'<span class="ok">ALL SYSTEMS ONLINE</span>'];
+    const el=document.getElementById("bootlines");
+    let i=0;
+    const iv=setInterval(()=>{
+      if(el) el.innerHTML=lines.slice(0,i+1).join("<br>");
+      i++;
+      if(i>=lines.length){clearInterval(iv);}
+    },360);
+    setTimeout(()=>{
+      const boot=document.getElementById("boot");
+      if(boot) boot.classList.add("gone");
+      document.body.classList.add("ready");
+    },1650);
+  }
+</script>
+</body>
+</html>

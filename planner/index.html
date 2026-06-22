@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChristianGetsLeads — Content Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16181D; --ink-soft:#21242C; --paper:#F6F3EC; --paper-2:#EFEBE0;
+    --line:#D9D3C4; --muted:#6B6759;
+    --spine:#C08A2D; --faith:#4B4E8C; --fitness:#B5482F; --family:#3F6B4E;
+    --ok:#3F6B4E; --warn:#B5482F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;line-height:1.05;margin:0;letter-spacing:-0.015em;}
+  .mono{font-family:"Space Mono",monospace;}
+  .eyebrow{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+  button{font-family:"Space Mono",monospace;cursor:pointer;border:none;background:none;}
+  select,input,textarea{font-family:"Newsreader",serif;font-size:16px;color:var(--ink);}
+
+  /* Masthead */
+  .masthead{background:var(--ink);color:var(--paper);border-bottom:3px solid var(--spine);position:sticky;top:0;z-index:20;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;flex-wrap:wrap;}
+  .brand{font-family:"Space Mono",monospace;font-weight:700;font-size:14px;letter-spacing:0.14em;color:var(--paper);}
+  .brand b{color:var(--spine);}
+  .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .week-in{background:var(--ink-soft);border:1px solid #343842;color:var(--paper);border-radius:8px;padding:8px 11px;font-size:14px;}
+  .week-in::placeholder{color:#7E7A6E;}
+  .toggle{display:flex;background:var(--ink-soft);border:1px solid #343842;border-radius:8px;overflow:hidden;}
+  .toggle button{padding:8px 14px;color:#9A9486;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;}
+  .toggle button.on{background:var(--spine);color:#1A1407;font-weight:700;}
+  .save-dot{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.08em;color:#7E7A6E;white-space:nowrap;}
+  .save-dot.live{color:#9FB9AC;}
+
+  /* Ratio meter */
+  .meter-sec{background:var(--ink);color:var(--paper);padding:22px 0 30px;}
+  .meter-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .meter-head .eyebrow{color:var(--spine);}
+  .meter-head .total{font-family:"Space Mono",monospace;font-size:12px;color:#B6B1A4;letter-spacing:0.06em;}
+  .meter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;}
+  .gauge{background:var(--ink-soft);border:1px solid #2C2F38;border-radius:10px;padding:14px 16px;border-top:5px solid var(--c);}
+  .gauge .gname{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#C9C3B5;}
+  .gauge .gcount{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:30px;margin-top:4px;line-height:1;}
+  .gauge .gcount em{font-style:normal;font-size:15px;color:#7E7A6E;font-weight:500;}
+  .gbar{height:7px;background:#11131A;border-radius:4px;margin-top:11px;overflow:hidden;}
+  .gfill{height:100%;background:var(--c);border-radius:4px;transition:width .35s ease;}
+  .gstat{font-family:"Space Mono",monospace;font-size:11px;margin-top:9px;letter-spacing:0.03em;}
+  .gstat.good{color:#8FB89E;}
+  .gstat.under{color:#E0A36A;}
+  .gstat.over{color:#E08469;}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:22px 0 6px;}
+  .btn{border:1px solid var(--ink);border-radius:8px;padding:10px 16px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:#fff;font-weight:700;transition:.12s;}
+  .btn:hover{background:var(--ink);color:var(--paper);}
+  .btn.primary{background:var(--spine);border-color:var(--spine);color:#1A1407;}
+  .btn.primary:hover{background:#A9781F;color:#fff;}
+  .btn.ghost{border-color:var(--line);color:var(--muted);background:transparent;font-weight:400;}
+  .btn.ghost:hover{background:var(--paper-2);color:var(--ink);}
+  .spacer{flex:1;}
+
+  /* Board */
+  .board{padding:18px 0 80px;display:flex;flex-direction:column;gap:14px;}
+  .piece{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;border-left:6px solid var(--c);}
+  .p-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;}
+  .chip{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;}
+  .chip.day{background:var(--paper-2);color:var(--ink);font-weight:700;}
+  .chip.pillar{background:var(--c);color:#fff;font-weight:700;}
+  .chip.pillar.spine{color:#1A1407;}
+  .p-head .ttl{flex:1;font-size:16px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .p-head .ttl.has{color:var(--ink);font-weight:500;}
+  .status-dot{width:11px;height:11px;border-radius:50%;background:#C9C3B5;flex-shrink:0;}
+  .status-dot.scripted{background:var(--spine);}
+  .status-dot.ready{background:var(--ok);}
+  .caret{font-family:"Space Mono",monospace;color:var(--muted);font-size:13px;transition:transform .15s;}
+  .piece.open .caret{transform:rotate(90deg);}
+
+  .p-body{display:none;padding:4px 18px 20px;border-top:1px solid var(--paper-2);}
+  .piece.open .p-body{display:block;}
+  .meta-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field.grow{flex:1;min-width:160px;}
+  .field label{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+  .sel,.txt,.area{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#FCFBF6;width:100%;}
+  .sel:focus,.txt:focus,.area:focus{outline:2px solid var(--spine);outline-offset:-1px;border-color:var(--spine);}
+  .area{resize:vertical;line-height:1.55;min-height:60px;}
+  .area.script{min-height:150px;}
+  .counter{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--muted);}
+  .counter.good{color:var(--ok);}
+  .counter.warn{color:var(--warn);}
+  .flag{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--warn);}
+  .hint{font-size:13.5px;color:var(--muted);font-style:italic;margin:3px 0 0;}
+  .p-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;flex-wrap:wrap;}
+  .statseg{display:flex;gap:6px;}
+  .statseg button{border:1px solid var(--line);border-radius:7px;padding:6px 11px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);background:#fff;}
+  .statseg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .del{color:var(--warn);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:6px 4px;}
+  .del:hover{text-decoration:underline;}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty p{font-style:italic;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:10px;font-family:"Space Mono",monospace;font-size:12px;letter-spacing:0.06em;opacity:0;pointer-events:none;transition:.25s;z-index:50;border:1px solid var(--spine);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:760px){
+    .meter-grid{grid-template-columns:repeat(2,1fr);}
+    .masthead .wrap{padding:14px 18px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">CHRISTIAN<b>GETS</b>LEADS · PLANNER</div>
+    <div class="controls">
+      <input class="week-in" id="weekIn" placeholder="Week of..." aria-label="Week label">
+      <div class="toggle" id="volToggle">
+        <button data-vol="lean">Lean 20</button>
+        <button data-vol="full" class="on">Full 35</button>
+      </div>
+      <span class="save-dot" id="saveDot">in memory</span>
+    </div>
+  </div>
+</div>
+
+<div class="meter-sec">
+  <div class="wrap">
+    <div class="meter-head">
+      <div class="eyebrow">Live ratio · target 60 · 15 · 13 · 12</div>
+      <div class="total mono" id="totalLine">0 of 35 planned</div>
+    </div>
+    <div class="meter-grid" id="meterGrid"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn primary" id="addBtn">+ Add piece</button>
+    <button class="btn" id="seedBtn">Load week skeleton</button>
+    <div class="spacer"></div>
+    <button class="btn ghost" id="exportBtn">Export markdown</button>
+    <button class="btn ghost" id="backupBtn">Backup</button>
+    <button class="btn ghost" id="restoreBtn">Restore</button>
+    <button class="btn ghost" id="clearBtn">Clear</button>
+    <input type="file" id="fileIn" accept=".json" style="display:none">
+  </div>
+
+  <div class="board" id="board"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- config ---------- */
+const PILLARS = {
+  spine:   {label:"Lead Gen", role:"Authority", color:"var(--spine)",  cls:"spine"},
+  faith:   {label:"Faith",    role:"Faith",     color:"var(--faith)",  cls:"faith"},
+  fitness: {label:"Fitness",  role:"Discipline",color:"var(--fitness)",cls:"fitness"},
+  family:  {label:"Family",   role:"Legacy",    color:"var(--family)", cls:"family"},
+};
+const TYPES = {
+  spine:   ["Educational how to","Ad teardown","Client win / proof","Hot take / myth bust","Offer / CTA"],
+  faith:   ["Principle in practice","Sunday reflection"],
+  fitness: ["Discipline parallel","Routine / system"],
+  family:  ["The why / legacy","Real life behind the scenes"],
+};
+const TARGETS = {
+  lean: {total:20, spine:12, faith:3, fitness:3, family:2},
+  full: {total:35, spine:21, faith:5, fitness:5, family:4},
+};
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const SKELETON = [
+  {day:"Mon",pillar:"spine",  type:"Ad teardown"},
+  {day:"Tue",pillar:"spine",  type:"Educational how to"},
+  {day:"Wed",pillar:"fitness",type:"Discipline parallel"},
+  {day:"Thu",pillar:"spine",  type:"Client win / proof"},
+  {day:"Fri",pillar:"faith",  type:"Principle in practice"},
+  {day:"Sat",pillar:"family", type:"The why / legacy"},
+  {day:"Sun",pillar:"faith",  type:"Sunday reflection"},
+];
+
+/* ---------- state ---------- */
+let state = { week:"", volume:"full", pieces:[] };
+let nextId = 1;
+const uid = () => "p"+(nextId++)+"_"+Math.random().toString(36).slice(2,6);
+
+/* ---------- persistence (localStorage, graceful) ---------- */
+const KEY = "cgl-planner-state-v1";
+let canStore = (function(){try{localStorage.setItem("__cgl_t","1");localStorage.removeItem("__cgl_t");return true;}catch(e){return false;}})();
+let saveTimer = null;
+
+function loadState(){
+  if(!canStore) { setSave("in memory"); return; }
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.pieces)){
+        state = parsed;
+        const maxN = state.pieces.reduce((m,p)=>{const n=parseInt((p.id||"").replace(/\D/g,""))||0;return Math.max(m,n);},0);
+        nextId = maxN+1;
+      }
+    }
+  }catch(e){ /* fresh */ }
+  setSave("saved");
+}
+function scheduleSave(){
+  setSave("saving");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 400);
+}
+function doSave(){
+  if(!canStore){ setSave("in memory"); return; }
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); setSave("saved"); }
+  catch(e){ setSave("export to keep"); }
+}
+function setSave(t){
+  const el = document.getElementById("saveDot");
+  el.textContent = t;
+  el.classList.toggle("live", t==="saved"||t==="saving");
+}
+
+/* ---------- helpers ---------- */
+const wordCount = s => (s.trim().match(/\S+/g)||[]).length;
+const hasDash = s => /—|–|(\s-\s)/.test(s);
+function get(id){ return state.pieces.find(p=>p.id===id); }
+function toast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1700);
+}
+
+/* ---------- meter ---------- */
+function renderMeter(){
+  const tgt = TARGETS[state.volume];
+  const counts = {spine:0,faith:0,fitness:0,family:0};
+  state.pieces.forEach(p=>{ if(counts[p.pillar]!=null) counts[p.pillar]++; });
+  const grid = document.getElementById("meterGrid");
+  grid.innerHTML = Object.keys(PILLARS).map(k=>{
+    const P=PILLARS[k], have=counts[k], need=tgt[k];
+    const pctFill=Math.min(100, need? (have/need*100):0);
+    let cls="good", txt="on target";
+    if(have<need){cls="under";txt="add "+(need-have);}
+    else if(have>need){cls=(k==="spine")?"good":"over";txt=(k==="spine")?"on target":("over by "+(have-need));}
+    return `<div class="gauge" style="--c:${P.color}">
+      <div class="gname">${P.label}</div>
+      <div class="gcount">${have}<em> / ${need}</em></div>
+      <div class="gbar"><div class="gfill" style="width:${pctFill}%"></div></div>
+      <div class="gstat ${cls}">${txt}</div>
+    </div>`;
+  }).join("");
+  document.getElementById("totalLine").textContent = state.pieces.length+" of "+tgt.total+" planned";
+}
+
+/* ---------- card ---------- */
+function cardHTML(p){
+  const P=PILLARS[p.pillar];
+  const opts=DAYS.map(d=>`<option ${d===p.day?"selected":""}>${d}</option>`).join("");
+  const pillOpts=Object.keys(PILLARS).map(k=>`<option value="${k}" ${k===p.pillar?"selected":""}>${PILLARS[k].label}</option>`).join("");
+  const typeOpts=(TYPES[p.pillar]||[]).map(t=>`<option ${t===p.type?"selected":""}>${t}</option>`).join("");
+  const titleTxt = p.hook ? p.hook : (p.type||"Untitled piece");
+  const wc=wordCount(p.script||""), hc=(p.hook||"").length;
+  return `
+  <div class="piece ${p.open?"open":""}" data-id="${p.id}" style="--c:${P.color}">
+    <div class="p-head" data-act="toggle">
+      <span class="chip day">${p.day}</span>
+      <span class="chip pillar ${P.cls}">${P.label}</span>
+      <span class="ttl ${p.hook?"has":""}">${escapeHtml(titleTxt)}</span>
+      <span class="status-dot ${p.status}" title="${p.status}"></span>
+      <span class="caret">▶</span>
+    </div>
+    <div class="p-body">
+      <div class="meta-row">
+        <div class="field"><label>Day</label><select class="sel" data-f="day" style="min-width:90px">${opts}</select></div>
+        <div class="field grow"><label>Pillar</label><select class="sel" data-f="pillar">${pillOpts}</select></div>
+        <div class="field grow"><label>Type</label><select class="sel" data-f="type">${typeOpts}</select></div>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>Hook <span class="counter ${hookCls(hc)}" data-c="hook">${hc}/125</span></label>
+        <input class="txt" data-f="hook" value="${escapeAttr(p.hook||"")}" placeholder="Bold scroll stopper, under 125 characters">
+        <p class="hint">One punchy line. No dashes. Make a business owner stop.</p>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>Script <span class="counter ${wcCls(wc)}" data-c="script">${wc} words · aim 150-220</span> <span class="flag" data-flag="script" style="${hasDash(p.script||"")?"":"display:none"}">dash detected</span></label>
+        <textarea class="area script" data-f="script" placeholder="Extract the core lesson. Do not retell the story. Short spaced paragraphs.">${escapeHtml(p.script||"")}</textarea>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>CTA <span class="flag" data-flag="cta" style="${hasDash(p.cta||"")?"":"display:none"}">dash detected</span></label>
+        <input class="txt" data-f="cta" value="${escapeAttr(p.cta||"")}" placeholder='Comment driver. e.g. Comment "LEADS" and I will send it'>
+      </div>
+
+      <div class="p-foot">
+        <div class="statseg" data-f="status">
+          <button data-s="idea" class="${p.status==="idea"?"on":""}">Idea</button>
+          <button data-s="scripted" class="${p.status==="scripted"?"on":""}">Scripted</button>
+          <button data-s="ready" class="${p.status==="ready"?"on":""}">Ready</button>
+        </div>
+        <button class="del" data-act="del">Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+function hookCls(n){ if(n===0)return""; if(n<=125)return"good"; return"warn"; }
+function wcCls(n){ if(n===0)return""; if(n>=150&&n<=220)return"good"; return"warn"; }
+function escapeHtml(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function escapeAttr(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+
+/* ---------- render board ---------- */
+function renderBoard(){
+  const board=document.getElementById("board");
+  if(!state.pieces.length){
+    board.innerHTML=`<div class="empty"><p>No pieces yet. Load the week skeleton or add your first piece.</p></div>`;
+  } else {
+    board.innerHTML = state.pieces.map(cardHTML).join("");
+  }
+  renderMeter();
+}
+
+/* ---------- in-place updates (keep focus) ---------- */
+function updateCounter(card,p){
+  const hc=(p.hook||"").length, wc=wordCount(p.script||"");
+  const hCo=card.querySelector('[data-c="hook"]'); if(hCo){hCo.textContent=hc+"/125";hCo.className="counter "+hookCls(hc);}
+  const sCo=card.querySelector('[data-c="script"]'); if(sCo){sCo.textContent=wc+" words · aim 150-220";sCo.className="counter "+wcCls(wc);}
+  const sFlag=card.querySelector('[data-flag="script"]'); if(sFlag) sFlag.style.display=hasDash(p.script||"")?"":"none";
+  const cFlag=card.querySelector('[data-flag="cta"]'); if(cFlag) cFlag.style.display=hasDash(p.cta||"")?"":"none";
+  const ttl=card.querySelector(".ttl"); if(ttl){ttl.textContent=p.hook?p.hook:(p.type||"Untitled piece");ttl.classList.toggle("has",!!p.hook);}
+}
+
+/* ---------- events ---------- */
+document.getElementById("board").addEventListener("input",e=>{
+  const card=e.target.closest(".piece"); if(!card)return;
+  const p=get(card.dataset.id); if(!p)return;
+  const f=e.target.dataset.f;
+  if(f==="hook"||f==="script"||f==="cta"){ p[f]=e.target.value; updateCounter(card,p); scheduleSave(); }
+});
+document.getElementById("board").addEventListener("change",e=>{
+  const card=e.target.closest(".piece"); if(!card)return;
+  const p=get(card.dataset.id); if(!p)return;
+  const f=e.target.dataset.f;
+  if(f==="day"){ p.day=e.target.value; card.querySelector(".chip.day").textContent=p.day; scheduleSave(); }
+  if(f==="type"){ p.type=e.target.value; updateCounter(card,p); scheduleSave(); }
+  if(f==="pillar"){
+    p.pillar=e.target.value;
+    if(!TYPES[p.pillar].includes(p.type)) p.type=TYPES[p.pillar][0];
+    p.open=true;
+    card.outerHTML=cardHTML(p);
+    renderMeter(); scheduleSave();
+  }
+});
+document.getElementById("board").addEventListener("click",e=>{
+  const card=e.target.closest(".piece"); if(!card)return;
+  const p=get(card.dataset.id); if(!p)return;
+  const act=e.target.closest("[data-act]")?.dataset.act;
+  if(act==="toggle" && !e.target.closest("select,input,textarea,button")){
+    p.open=!p.open; card.classList.toggle("open",p.open); scheduleSave(); return;
+  }
+  if(act==="del"){
+    if(confirm("Delete this piece?")){ state.pieces=state.pieces.filter(x=>x.id!==p.id); card.remove(); renderMeter(); scheduleSave(); }
+    return;
+  }
+  const sBtn=e.target.closest(".statseg [data-s]");
+  if(sBtn){
+    p.status=sBtn.dataset.s;
+    card.querySelectorAll(".statseg button").forEach(b=>b.classList.toggle("on",b.dataset.s===p.status));
+    card.querySelector(".status-dot").className="status-dot "+p.status;
+    scheduleSave();
+  }
+});
+
+/* ---------- toolbar ---------- */
+function newPiece(seed={}){
+  return {id:uid(),day:seed.day||"Mon",pillar:seed.pillar||"spine",type:seed.type||TYPES[seed.pillar||"spine"][0],hook:"",script:"",cta:"",status:"idea",open:true};
+}
+document.getElementById("addBtn").addEventListener("click",()=>{
+  const p=newPiece(); state.pieces.push(p);
+  const board=document.getElementById("board");
+  if(board.querySelector(".empty")) board.innerHTML="";
+  board.insertAdjacentHTML("beforeend",cardHTML(p));
+  renderMeter(); scheduleSave();
+  board.lastElementChild.scrollIntoView({behavior:"smooth",block:"center"});
+});
+document.getElementById("seedBtn").addEventListener("click",()=>{
+  if(state.pieces.length && !confirm("Add the 7 day skeleton to your current pieces?")) return;
+  SKELETON.forEach(s=>state.pieces.push(newPiece({...s, open:false})));
+  state.pieces.forEach(p=>p.open=false);
+  renderBoard(); scheduleSave(); toast("Skeleton loaded");
+});
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  if(confirm("Clear all pieces? Export first if you want to keep them.")){ state.pieces=[]; renderBoard(); scheduleSave(); }
+});
+
+/* volume + week */
+document.getElementById("volToggle").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-vol]"); if(!b)return;
+  state.volume=b.dataset.vol;
+  document.querySelectorAll("#volToggle button").forEach(x=>x.classList.toggle("on",x.dataset.vol===state.volume));
+  renderMeter(); scheduleSave();
+});
+document.getElementById("weekIn").addEventListener("input",e=>{ state.week=e.target.value; scheduleSave(); });
+
+/* ---------- export markdown ---------- */
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const order={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
+  const sorted=[...state.pieces].sort((a,b)=>(order[a.day]-order[b.day]));
+  let md=`# ChristianGetsLeads Content Plan\n`;
+  md+=`Week: ${state.week||"(untitled)"}  ·  Volume: ${state.volume==="full"?"Full 35":"Lean 20"}  ·  ${state.pieces.length} pieces\n\n`;
+  let curDay="";
+  sorted.forEach(p=>{
+    if(p.day!==curDay){ md+=`\n## ${p.day}\n\n`; curDay=p.day; }
+    md+=`### ${PILLARS[p.pillar].label} — ${p.type}  \`${p.status}\`\n\n`;
+    md+=`**Hook:** ${p.hook||"_(empty)_"}\n\n`;
+    md+=`**Script:**\n\n${p.script||"_(empty)_"}\n\n`;
+    md+=`**CTA:** ${p.cta||"_(empty)_"}\n\n---\n\n`;
+  });
+  download((state.week||"cgl-plan").replace(/\s+/g,"-").toLowerCase()+".md", md, "text/markdown");
+  toast("Markdown exported");
+});
+document.getElementById("backupBtn").addEventListener("click",()=>{
+  download("cgl-planner-backup.json", JSON.stringify(state,null,2), "application/json");
+  toast("Backup downloaded");
+});
+document.getElementById("restoreBtn").addEventListener("click",()=>document.getElementById("fileIn").click());
+document.getElementById("fileIn").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(d&&Array.isArray(d.pieces)){ state=d; nextId=state.pieces.length+1; syncUI(); renderBoard(); scheduleSave(); toast("Plan restored"); }
+    else toast("Invalid file");
+  }catch(err){toast("Could not read file");} };
+  r.readAsText(f); e.target.value="";
+});
+function download(name,content,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),500);
+}
+
+/* ---------- boot ---------- */
+function syncUI(){
+  document.getElementById("weekIn").value=state.week||"";
+  document.querySelectorAll("#volToggle button").forEach(x=>x.classList.toggle("on",x.dataset.vol===state.volume));
+}
+(function init(){
+  loadState();
+  if(!state.pieces.length){ SKELETON.forEach(s=>state.pieces.push(newPiece({...s,open:false}))); }
+  syncUI();
+  renderBoard();
+})();
+</script>
+</body>
+</html>

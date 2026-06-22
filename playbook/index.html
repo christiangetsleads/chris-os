@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChristianGetsLeads — Content Ratio Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16181D;
+    --ink-soft:#21242C;
+    --paper:#F6F3EC;
+    --paper-2:#EFEBE0;
+    --line:#D9D3C4;
+    --muted:#6B6759;
+
+    --spine:#C08A2D;   /* Lead Gen */
+    --faith:#4B4E8C;   /* Faith */
+    --fitness:#B5482F; /* Fitness */
+    --family:#3F6B4E;  /* Family */
+
+    --maxw:1080px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:18px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  .eyebrow{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  h1,h2,h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;line-height:1.04;margin:0;letter-spacing:-0.015em;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    background:var(--ink);
+    color:var(--paper);
+    padding:22px 0;
+    border-bottom:3px solid var(--spine);
+  }
+  .masthead .wrap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;}
+  .brand{font-family:"Space Mono",monospace;font-weight:700;font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--paper);}
+  .brand b{color:var(--spine);}
+  .masthead .tag{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:0.12em;color:#9A9486;text-transform:uppercase;}
+
+  /* ---------- Hero ---------- */
+  .hero{background:var(--ink);color:var(--paper);padding:64px 0 78px;}
+  .hero .eyebrow{color:var(--spine);}
+  .hero h1{
+    font-size:clamp(38px,6.4vw,76px);
+    color:var(--paper);
+    margin:18px 0 0;
+    max-width:14ch;
+  }
+  .hero h1 .accent{color:var(--spine);}
+  .hero p.lead{
+    font-size:clamp(18px,2.2vw,22px);
+    color:#CFC9BB;
+    max-width:54ch;
+    margin:22px 0 0;
+  }
+
+  /* ---------- Master ratio bar (signature) ---------- */
+  .ratio{margin-top:46px;}
+  .ratio-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .ratio-label .eyebrow{color:#9A9486;}
+  .ratio-bar{
+    display:flex;width:100%;height:74px;border-radius:6px;overflow:hidden;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .seg{
+    position:relative;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:12px 14px;color:#fff;overflow:hidden;
+    transition:flex-basis .25s ease;
+  }
+  .seg .pct{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(20px,3vw,30px);line-height:1;}
+  .seg .nm{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-top:5px;opacity:.92;white-space:nowrap;}
+  .seg.spine{background:var(--spine);}
+  .seg.faith{background:var(--faith);}
+  .seg.fitness{background:var(--fitness);}
+  .seg.family{background:var(--family);}
+  .seg.faith .nm,.seg.fitness .nm,.seg.family .nm,.seg.faith .pct,.seg.fitness .pct,.seg.family .pct{color:#fff;}
+  .seg.spine .pct,.seg.spine .nm{color:#1A1407;}
+
+  .anim .seg{animation:grow .9s cubic-bezier(.2,.7,.2,1) both;}
+  @keyframes grow{from{flex-basis:0 !important;opacity:.4;}to{opacity:1;}}
+
+  /* ---------- Section frame ---------- */
+  section{padding:72px 0;}
+  .sec-head{margin-bottom:8px;}
+  .sec-head h2{font-size:clamp(28px,4vw,42px);margin-top:10px;}
+  .sec-sub{color:var(--muted);max-width:58ch;margin:14px 0 0;font-size:18px;}
+
+  /* ---------- Volume note ---------- */
+  .volumes{
+    display:flex;gap:14px;flex-wrap:wrap;margin-top:34px;
+  }
+  .vol{
+    flex:1 1 240px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;
+  }
+  .vol .k{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+  .vol .v{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:34px;margin-top:6px;}
+  .vol .v small{font-size:15px;font-weight:500;color:var(--muted);font-family:"Newsreader",serif;}
+
+  /* ---------- Pillar cards ---------- */
+  .pillars{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px;}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .card-top{padding:24px 26px 20px;border-top:6px solid var(--c);}
+  .card-top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .pillar-name{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.01em;}
+  .pillar-role{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .big-pct{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:46px;line-height:.9;color:var(--c);}
+  .mini-bar{height:8px;background:var(--paper-2);border-radius:4px;margin-top:18px;overflow:hidden;}
+  .mini-fill{height:100%;background:var(--c);border-radius:4px;}
+
+  .types{padding:6px 26px 24px;}
+  .type{
+    display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;
+    padding:13px 0;border-bottom:1px solid var(--paper-2);
+  }
+  .type:last-child{border-bottom:none;}
+  .type .t-name{font-size:16.5px;line-height:1.3;}
+  .type .t-name span{display:block;font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:0.05em;color:var(--muted);text-transform:uppercase;margin-top:3px;}
+  .count{font-family:"Space Mono",monospace;font-weight:700;font-size:18px;min-width:30px;text-align:right;}
+  .count.lean{color:var(--muted);}
+  .count.full{color:var(--c);}
+  .types-head{
+    display:grid;grid-template-columns:1fr auto auto;gap:14px;
+    font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);
+    padding:14px 0 8px;border-bottom:1px solid var(--line);
+  }
+  .types-head .h-c{min-width:30px;text-align:right;}
+
+  /* ---------- Weekly rhythm ---------- */
+  .rhythm-sec{background:var(--ink);color:var(--paper);}
+  .rhythm-sec .eyebrow{color:var(--spine);}
+  .rhythm-sec h2{color:var(--paper);}
+  .rhythm-sec .sec-sub{color:#B6B1A4;}
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:34px;}
+  .day{
+    background:var(--ink-soft);border:1px solid #2C2F38;border-radius:10px;padding:16px 12px;min-height:128px;
+    display:flex;flex-direction:column;
+  }
+  .day .dname{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8C8678;}
+  .day .spot{
+    margin-top:auto;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;line-height:1.15;
+    padding-top:10px;
+  }
+  .day .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-bottom:8px;}
+  .day .base{font-size:12.5px;color:#7E7A6E;font-family:"Newsreader",serif;margin-top:6px;line-height:1.3;}
+  .dot.spine{background:var(--spine);}.dot.faith{background:var(--faith);}.dot.fitness{background:var(--fitness);}.dot.family{background:var(--family);}
+  .spot.spine{color:var(--spine);}.spot.faith{color:#9396D6;}.spot.fitness{color:#E08469;}.spot.family{color:#7FB28E;}
+
+  /* ---------- Rules ---------- */
+  .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px;}
+  .rule{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 26px 28px;position:relative;}
+  .rule .num{font-family:"Space Mono",monospace;font-weight:700;font-size:13px;color:var(--spine);letter-spacing:0.1em;}
+  .rule h3{font-size:21px;margin:14px 0 10px;}
+  .rule p{margin:0;color:#43413A;font-size:16.5px;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--ink);color:#8C8678;padding:30px 0;border-top:3px solid var(--spine);}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  footer .brand{color:var(--paper);}
+  footer .fnote{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.08em;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:820px){
+    .pillars{grid-template-columns:1fr;}
+    .rules{grid-template-columns:1fr;}
+    .week{grid-template-columns:repeat(2,1fr);}
+    .ratio-bar{height:64px;}
+    .seg .nm{font-size:9.5px;}
+  }
+  @media (max-width:480px){
+    body{font-size:17px;}
+    .week{grid-template-columns:1fr;}
+    .seg{padding:8px;}
+    .seg .nm{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .anim .seg{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">CHRISTIAN<b>GETS</b>LEADS</div>
+    <div class="tag">Content Operating System // The Ratio</div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">The doctrine</div>
+    <h1>Lead gen is the spine. <span class="accent">Faith, fitness, family</span> build the man behind the claim.</h1>
+    <p class="lead">Four pillars, one mission. The majority of your content proves you can get a business owner customers. The rest proves you are the kind of man he would trust to do it.</p>
+
+    <div class="ratio anim">
+      <div class="ratio-label">
+        <div class="eyebrow">Master mix</div>
+        <div class="eyebrow">Share of total output</div>
+      </div>
+      <div class="ratio-bar" role="img" aria-label="Content mix: Lead Gen 60 percent, Faith 15 percent, Fitness 13 percent, Family 12 percent">
+        <div class="seg spine"   style="flex-basis:60%"><span class="pct">60%</span><span class="nm">Lead Gen</span></div>
+        <div class="seg faith"   style="flex-basis:15%"><span class="pct">15%</span><span class="nm">Faith</span></div>
+        <div class="seg fitness" style="flex-basis:13%"><span class="pct">13%</span><span class="nm">Fitness</span></div>
+        <div class="seg family"  style="flex-basis:12%"><span class="pct">12%</span><span class="nm">Family</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">How to read this</div>
+      <h2>Two volumes. Same ratio.</h2>
+      <p class="sec-sub">The mix never changes. Only the amount does. Run lean when you are slammed with client work, run full when you have momentum. Every count below is posts per week.</p>
+    </div>
+    <div class="volumes">
+      <div class="vol">
+        <div class="k">Lean week</div>
+        <div class="v">20 <small>posts / about 3 a day</small></div>
+      </div>
+      <div class="vol">
+        <div class="k">Full week</div>
+        <div class="v">35 <small>posts / about 5 a day</small></div>
+      </div>
+      <div class="vol">
+        <div class="k">Recording load</div>
+        <div class="v">1 <small>batch day, Monday, the rest is clipping</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The four pillars</div>
+      <h2>What each pillar makes, and how much.</h2>
+      <p class="sec-sub">Each card shows its share of the total, then the content types inside it. The two number columns are your weekly targets at lean and full volume.</p>
+    </div>
+
+    <div class="pillars">
+
+      <!-- LEAD GEN -->
+      <div class="card" style="--c:var(--spine)">
+        <div class="card-top">
+          <div class="row">
+            <div>
+              <div class="pillar-name">Lead Gen / Authority</div>
+              <div class="pillar-role">The spine // the reason they follow</div>
+            </div>
+            <div class="big-pct">60%</div>
+          </div>
+          <div class="mini-bar"><div class="mini-fill" style="width:60%"></div></div>
+        </div>
+        <div class="types">
+          <div class="types-head"><div>Content type</div><div class="h-c">Lean</div><div class="h-c">Full</div></div>
+          <div class="type"><div class="t-name">Educational how to<span>Tactic they can use today</span></div><div class="count lean">4</div><div class="count full">7</div></div>
+          <div class="type"><div class="t-name">Ad teardown<span>Break down a winner or a flop</span></div><div class="count lean">3</div><div class="count full">5</div></div>
+          <div class="type"><div class="t-name">Client win / proof<span>Real results, real numbers</span></div><div class="count lean">2</div><div class="count full">4</div></div>
+          <div class="type"><div class="t-name">Hot take / myth bust<span>Position against the bad advice</span></div><div class="count lean">2</div><div class="count full">3</div></div>
+          <div class="type"><div class="t-name">Offer / CTA<span>DM keyword trigger post</span></div><div class="count lean">1</div><div class="count full">2</div></div>
+        </div>
+      </div>
+
+      <!-- FAITH -->
+      <div class="card" style="--c:var(--faith)">
+        <div class="card-top">
+          <div class="row">
+            <div>
+              <div class="pillar-name">Faith</div>
+              <div class="pillar-role">Highest of the three // it is in your name</div>
+            </div>
+            <div class="big-pct">15%</div>
+          </div>
+          <div class="mini-bar"><div class="mini-fill" style="width:25%"></div></div>
+        </div>
+        <div class="types">
+          <div class="types-head"><div>Content type</div><div class="h-c">Lean</div><div class="h-c">Full</div></div>
+          <div class="type"><div class="t-name">Principle in practice<span>A value driving how you run the shop</span></div><div class="count lean">2</div><div class="count full">3</div></div>
+          <div class="type"><div class="t-name">Sunday reflection<span>Scripture applied to the work</span></div><div class="count lean">1</div><div class="count full">2</div></div>
+        </div>
+      </div>
+
+      <!-- FITNESS -->
+      <div class="card" style="--c:var(--fitness)">
+        <div class="card-top">
+          <div class="row">
+            <div>
+              <div class="pillar-name">Fitness / Discipline</div>
+              <div class="pillar-role">Proof of execution standards</div>
+            </div>
+            <div class="big-pct">13%</div>
+          </div>
+          <div class="mini-bar"><div class="mini-fill" style="width:22%"></div></div>
+        </div>
+        <div class="types">
+          <div class="types-head"><div>Content type</div><div class="h-c">Lean</div><div class="h-c">Full</div></div>
+          <div class="type"><div class="t-name">Discipline parallel<span>Training mindset to business</span></div><div class="count lean">2</div><div class="count full">3</div></div>
+          <div class="type"><div class="t-name">Routine / system<span>Morning, habits, how you operate</span></div><div class="count lean">1</div><div class="count full">2</div></div>
+        </div>
+      </div>
+
+      <!-- FAMILY -->
+      <div class="card" style="--c:var(--family)">
+        <div class="card-top">
+          <div class="row">
+            <div>
+              <div class="pillar-name">Family / Legacy</div>
+              <div class="pillar-role">The why behind the standard</div>
+            </div>
+            <div class="big-pct">12%</div>
+          </div>
+          <div class="mini-bar"><div class="mini-fill" style="width:20%"></div></div>
+        </div>
+        <div class="types">
+          <div class="types-head"><div>Content type</div><div class="h-c">Lean</div><div class="h-c">Full</div></div>
+          <div class="type"><div class="t-name">The why / legacy<span>Who you are building for</span></div><div class="count lean">1</div><div class="count full">2</div></div>
+          <div class="type"><div class="t-name">Real life behind the scenes<span>Honest moments, not staged</span></div><div class="count lean">1</div><div class="count full">2</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="rhythm-sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Placement</div>
+      <h2>Spread the supporting pillars across the week.</h2>
+      <p class="sec-sub">Every day is lead gen by default. One supporting pillar gets the spotlight on its assigned day so faith, fitness, and family never cluster. Fill the remaining daily slots with authority content.</p>
+    </div>
+    <div class="week">
+      <div class="day"><div class="dname">Mon</div><div class="base">Batch record day. Authority heavy.</div><div class="spot spine"><span class="dot spine"></span>Ad teardown</div></div>
+      <div class="day"><div class="dname">Tue</div><div class="base">Pure value.</div><div class="spot spine"><span class="dot spine"></span>How to</div></div>
+      <div class="day"><div class="dname">Wed</div><div class="base">Midweek standard.</div><div class="spot fitness"><span class="dot fitness"></span>Discipline</div></div>
+      <div class="day"><div class="dname">Thu</div><div class="base">Show the receipts.</div><div class="spot spine"><span class="dot spine"></span>Client win</div></div>
+      <div class="day"><div class="dname">Fri</div><div class="base">Close the work week.</div><div class="spot faith"><span class="dot faith"></span>Faith principle</div></div>
+      <div class="day"><div class="dname">Sat</div><div class="base">Softer, human.</div><div class="spot family"><span class="dot family"></span>Family / why</div></div>
+      <div class="day"><div class="dname">Sun</div><div class="base">Reset.</div><div class="spot faith"><span class="dot faith"></span>Reflection</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Guardrails</div>
+      <h2>Three rules that keep the ratio honest.</h2>
+    </div>
+    <div class="rules">
+      <div class="rule">
+        <div class="num">RULE 01</div>
+        <h3>When in doubt, post lead gen.</h3>
+        <p>If you are not sure what a piece is, it defaults to authority. The spine is allowed to flex up. The supporting pillars are not.</p>
+      </div>
+      <div class="rule">
+        <div class="num">RULE 02</div>
+        <h3>Never two soft posts back to back.</h3>
+        <p>Faith, fitness, and family pieces get spaced out. A business owner should never open your page and see a lifestyle feed.</p>
+      </div>
+      <div class="rule">
+        <div class="num">RULE 03</div>
+        <h3>Every soft post ties back to the work.</h3>
+        <p>Faith means integrity in delivery. Fitness means discipline in execution. Family means you do not ghost. Always land the plane on why they should trust you with their budget.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand">CHRISTIAN<b style="color:var(--spine)">GETS</b>LEADS</div>
+    <div class="fnote">CONTENT RATIO PLAYBOOK // 60 · 15 · 13 · 12</div>
+  </div>
+</footer>
+
+</body>
+</html>
