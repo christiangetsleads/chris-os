@@ -92,7 +92,16 @@
   .spacer{flex:1;}
 
   /* Board */
-  .board{position:relative;z-index:1;padding:18px 0 80px;display:flex;flex-direction:column;gap:14px;}
+  .board{position:relative;z-index:1;padding:8px 0 80px;display:flex;flex-direction:column;gap:0;}
+  .total.hit{color:var(--cyan);}
+  .day-group{display:flex;flex-direction:column;gap:12px;padding:18px 0;border-top:1px solid var(--line);}
+  .day-group:first-child{border-top:none;}
+  .day-head{display:flex;align-items:center;gap:12px;}
+  .day-name{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:15px;letter-spacing:.2em;color:var(--text);text-transform:uppercase;}
+  .day-count{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);}
+  .day-add{margin-left:auto;font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);border-radius:7px;padding:6px 12px;background:transparent;transition:.14s;}
+  .day-add:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accentglow);}
+  .day-empty{font-family:"Space Mono",monospace;font-size:12px;color:#4f5564;font-style:italic;padding:2px 2px;}
   .piece{background:linear-gradient(160deg,var(--panel),rgba(10,12,17,.5));border:1px solid var(--line);border-radius:12px;overflow:hidden;border-left:4px solid var(--c);transition:border-color .2s,box-shadow .2s;}
   .piece:hover{box-shadow:0 0 30px -16px var(--c);}
   .piece.open{box-shadow:0 0 0 1px rgba(230,184,77,.18),0 18px 40px -22px #000;}
@@ -157,8 +166,8 @@
     <div class="controls">
       <input class="week-in" id="weekIn" placeholder="Week of..." aria-label="Week label">
       <div class="toggle" id="volToggle">
-        <button data-vol="lean">Lean 20</button>
-        <button data-vol="full" class="on">Full 35</button>
+        <button data-vol="base" class="on">15 / wk</button>
+        <button data-vol="push">21 / wk</button>
       </div>
       <span class="save-dot" id="saveDot">in memory</span>
     </div>
@@ -168,7 +177,7 @@
 <div class="meter-sec">
   <div class="wrap">
     <div class="meter-head">
-      <div class="eyebrow">Live ratio · target 60 · 15 · 13 · 12</div>
+      <div class="eyebrow">Weekly plan · goal 15+ posts · ratio 60·15·13·12</div>
       <div class="total mono" id="totalLine">0 of 35 planned</div>
     </div>
     <div class="meter-grid" id="meterGrid"></div>
@@ -177,8 +186,8 @@
 
 <div class="wrap">
   <div class="toolbar">
-    <button class="btn primary" id="addBtn">+ Add piece</button>
-    <button class="btn" id="seedBtn">Load week skeleton</button>
+    <button class="btn primary" id="addBtn">+ Add video</button>
+    <button class="btn" id="seedBtn">Load 15-video week</button>
     <div class="spacer"></div>
     <button class="btn ghost" id="exportBtn">Export markdown</button>
     <button class="btn ghost" id="backupBtn">Backup</button>
@@ -206,23 +215,33 @@ const TYPES = {
   fitness: ["Discipline parallel","Routine / system"],
   family:  ["The why / legacy","Real life behind the scenes"],
 };
+// Weekly post-count goals. "base" is the floor (15+/week); "push" is the stretch.
 const TARGETS = {
-  lean: {total:20, spine:12, faith:3, fitness:3, family:2},
-  full: {total:35, spine:21, faith:5, fitness:5, family:4},
+  base: {total:15, spine:9,  faith:2, fitness:2, family:2},
+  push: {total:21, spine:13, faith:3, fitness:3, family:2},
 };
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+// Default week: 15 posts, multiple videos on several days, holding the 60/15/13/12 mix.
 const SKELETON = [
   {day:"Mon",pillar:"spine",  type:"Ad teardown"},
+  {day:"Mon",pillar:"spine",  type:"Educational how to"},
+  {day:"Mon",pillar:"fitness",type:"Discipline parallel"},
   {day:"Tue",pillar:"spine",  type:"Educational how to"},
-  {day:"Wed",pillar:"fitness",type:"Discipline parallel"},
+  {day:"Tue",pillar:"spine",  type:"Client win / proof"},
+  {day:"Wed",pillar:"spine",  type:"Hot take / myth bust"},
+  {day:"Wed",pillar:"fitness",type:"Routine / system"},
   {day:"Thu",pillar:"spine",  type:"Client win / proof"},
+  {day:"Thu",pillar:"spine",  type:"Ad teardown"},
+  {day:"Fri",pillar:"spine",  type:"Offer / CTA"},
   {day:"Fri",pillar:"faith",  type:"Principle in practice"},
   {day:"Sat",pillar:"family", type:"The why / legacy"},
+  {day:"Sat",pillar:"spine",  type:"Educational how to"},
   {day:"Sun",pillar:"faith",  type:"Sunday reflection"},
+  {day:"Sun",pillar:"family", type:"Real life behind the scenes"},
 ];
 
 /* ---------- state ---------- */
-let state = { week:"", volume:"full", pieces:[] };
+let state = { week:"", volume:"base", pieces:[] };
 let nextId = 1;
 const uid = () => "p"+(nextId++)+"_"+Math.random().toString(36).slice(2,6);
 
@@ -275,7 +294,7 @@ function toast(msg){
 
 /* ---------- meter ---------- */
 function renderMeter(){
-  const tgt = TARGETS[state.volume];
+  const tgt = TARGETS[state.volume] || TARGETS.base;
   const counts = {spine:0,faith:0,fitness:0,family:0};
   state.pieces.forEach(p=>{ if(counts[p.pillar]!=null) counts[p.pillar]++; });
   const grid = document.getElementById("meterGrid");
@@ -292,7 +311,9 @@ function renderMeter(){
       <div class="gstat ${cls}">${txt}</div>
     </div>`;
   }).join("");
-  document.getElementById("totalLine").textContent = state.pieces.length+" of "+tgt.total+" planned";
+  const planned = state.pieces.length, totalEl = document.getElementById("totalLine");
+  if(planned >= tgt.total){ totalEl.textContent = planned+" planned · goal hit ✓"; totalEl.classList.add("hit"); }
+  else { totalEl.textContent = planned+" of "+tgt.total+" · "+(tgt.total-planned)+" to goal"; totalEl.classList.remove("hit"); }
 }
 
 /* ---------- card ---------- */
@@ -351,14 +372,23 @@ function wcCls(n){ if(n===0)return""; if(n>=150&&n<=220)return"good"; return"war
 function escapeHtml(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 function escapeAttr(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
 
-/* ---------- render board ---------- */
+/* ---------- render board (grouped by day, multiple videos per day) ---------- */
 function renderBoard(){
   const board=document.getElementById("board");
-  if(!state.pieces.length){
-    board.innerHTML=`<div class="empty"><p>No pieces yet. Load the week skeleton or add your first piece.</p></div>`;
-  } else {
-    board.innerHTML = state.pieces.map(cardHTML).join("");
-  }
+  board.innerHTML = DAYS.map(d=>{
+    const dayPieces = state.pieces.filter(p=>p.day===d);
+    const cards = dayPieces.length
+      ? dayPieces.map(cardHTML).join("")
+      : `<div class="day-empty">No videos yet</div>`;
+    return `<div class="day-group">
+      <div class="day-head">
+        <span class="day-name">${d}</span>
+        <span class="day-count">${dayPieces.length} ${dayPieces.length===1?"video":"videos"}</span>
+        <button class="day-add" data-addday="${d}">+ video</button>
+      </div>
+      ${cards}
+    </div>`;
+  }).join("");
   renderMeter();
 }
 
@@ -383,7 +413,7 @@ document.getElementById("board").addEventListener("change",e=>{
   const card=e.target.closest(".piece"); if(!card)return;
   const p=get(card.dataset.id); if(!p)return;
   const f=e.target.dataset.f;
-  if(f==="day"){ p.day=e.target.value; card.querySelector(".chip.day").textContent=p.day; scheduleSave(); }
+  if(f==="day"){ p.day=e.target.value; renderBoard(); scheduleSave(); }
   if(f==="type"){ p.type=e.target.value; updateCounter(card,p); scheduleSave(); }
   if(f==="pillar"){
     p.pillar=e.target.value;
@@ -394,6 +424,8 @@ document.getElementById("board").addEventListener("change",e=>{
   }
 });
 document.getElementById("board").addEventListener("click",e=>{
+  const addBtn=e.target.closest("[data-addday]");
+  if(addBtn){ addPieceToDay(addBtn.dataset.addday); return; }
   const card=e.target.closest(".piece"); if(!card)return;
   const p=get(card.dataset.id); if(!p)return;
   const act=e.target.closest("[data-act]")?.dataset.act;
@@ -401,7 +433,7 @@ document.getElementById("board").addEventListener("click",e=>{
     p.open=!p.open; card.classList.toggle("open",p.open); scheduleSave(); return;
   }
   if(act==="del"){
-    if(confirm("Delete this piece?")){ state.pieces=state.pieces.filter(x=>x.id!==p.id); card.remove(); renderMeter(); scheduleSave(); }
+    if(confirm("Delete this video?")){ state.pieces=state.pieces.filter(x=>x.id!==p.id); renderBoard(); scheduleSave(); }
     return;
   }
   const sBtn=e.target.closest(".statseg [data-s]");
@@ -417,19 +449,17 @@ document.getElementById("board").addEventListener("click",e=>{
 function newPiece(seed={}){
   return {id:uid(),day:seed.day||"Mon",pillar:seed.pillar||"spine",type:seed.type||TYPES[seed.pillar||"spine"][0],hook:"",script:"",cta:"",status:"idea",open:true};
 }
-document.getElementById("addBtn").addEventListener("click",()=>{
-  const p=newPiece(); state.pieces.push(p);
-  const board=document.getElementById("board");
-  if(board.querySelector(".empty")) board.innerHTML="";
-  board.insertAdjacentHTML("beforeend",cardHTML(p));
-  renderMeter(); scheduleSave();
-  board.lastElementChild.scrollIntoView({behavior:"smooth",block:"center"});
-});
+function addPieceToDay(day){
+  const p=newPiece({day}); state.pieces.push(p);
+  renderBoard(); scheduleSave();
+  const el=document.querySelector(`.piece[data-id="${p.id}"]`); if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("addBtn").addEventListener("click",()=>addPieceToDay("Mon"));
 document.getElementById("seedBtn").addEventListener("click",()=>{
-  if(state.pieces.length && !confirm("Add the 7 day skeleton to your current pieces?")) return;
+  if(state.pieces.length && !confirm("Add the 15-video starter week to your current videos?")) return;
   SKELETON.forEach(s=>state.pieces.push(newPiece({...s, open:false})));
   state.pieces.forEach(p=>p.open=false);
-  renderBoard(); scheduleSave(); toast("Skeleton loaded");
+  renderBoard(); scheduleSave(); toast("Starter week loaded");
 });
 document.getElementById("clearBtn").addEventListener("click",()=>{
   if(confirm("Clear all pieces? Export first if you want to keep them.")){ state.pieces=[]; renderBoard(); scheduleSave(); }
@@ -485,6 +515,7 @@ function download(name,content,mime){
 
 /* ---------- boot ---------- */
 function syncUI(){
+  if(!TARGETS[state.volume]) state.volume="base"; // migrate old lean/full saves
   document.getElementById("weekIn").value=state.week||"";
   document.querySelectorAll("#volToggle button").forEach(x=>x.classList.toggle("on",x.dataset.vol===state.volume));
 }
