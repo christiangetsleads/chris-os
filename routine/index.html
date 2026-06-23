@@ -83,7 +83,11 @@
   .timeline{display:flex;flex-direction:column;gap:10px;}
   .blk{display:grid;grid-template-columns:84px 1fr;background:linear-gradient(160deg,var(--panel),rgba(10,12,17,.5));border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative;transition:border-color .2s,box-shadow .2s;}
   .blk.now{box-shadow:0 0 0 1px var(--accent),0 0 30px -12px var(--accentglow);border-color:var(--accent);}
-  .blk-time{background:rgba(255,255,255,.03);padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid var(--line);}
+  .blk-time{background:rgba(255,255,255,.03);padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid var(--line);cursor:grab;}
+  .blk-time:active{cursor:grabbing;}
+  .blk-time .grip{font-size:12px;line-height:1;letter-spacing:1px;color:var(--muted);opacity:.55;margin-bottom:7px;}
+  .blk.dragging{opacity:.4;}
+  .blk.drag-over{outline:2px dashed var(--accent);outline-offset:2px;box-shadow:0 0 26px -10px var(--accentglow);}
   .blk-time .start{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:18px;line-height:1;}
   .blk-time .ampm{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.05em;}
   .blk-time .dur{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);margin-top:8px;}
@@ -296,7 +300,8 @@ function sortDay(){curList().sort((a,b)=>toMin(a.start)-toMin(b.start));}
 function blockHTML(b){
   const P=PILLARS[b.pillar]; const s=fmt12(b.start);
   return `<div class="blk ${b.open?"open":""}" data-id="${b.id}" style="--c:${P.color}">
-    <div class="blk-time">
+    <div class="blk-time" draggable="true" title="Drag onto another block to swap times">
+      <div class="grip" aria-hidden="true">⠿</div>
       <div class="start">${s.t}</div><div class="ampm">${s.ap}</div>
       <div class="dur">${durLabel(b.dur)}</div>
     </div>
@@ -396,6 +401,38 @@ document.getElementById("dayTabs").addEventListener("click",e=>{
 
 /* ---------- events: timeline ---------- */
 const tl=document.getElementById("timeline");
+
+/* drag a block (by its time column) onto another to swap their start times */
+let draggedId=null;
+tl.addEventListener("dragstart",e=>{
+  const handle=e.target.closest(".blk-time"); if(!handle){e.preventDefault();return;}
+  const blk=handle.closest(".blk"); if(!blk)return;
+  draggedId=blk.dataset.id;
+  e.dataTransfer.effectAllowed="move";
+  try{ e.dataTransfer.setData("text/plain",draggedId); e.dataTransfer.setDragImage(blk,24,24); }catch(_){}
+  blk.classList.add("dragging");
+});
+tl.addEventListener("dragover",e=>{
+  const blk=e.target.closest(".blk"); if(!blk||!draggedId)return;
+  e.preventDefault(); e.dataTransfer.dropEffect="move";
+  document.querySelectorAll(".blk.drag-over").forEach(el=>{if(el!==blk)el.classList.remove("drag-over");});
+  if(blk.dataset.id!==draggedId) blk.classList.add("drag-over");
+});
+tl.addEventListener("drop",e=>{
+  const blk=e.target.closest(".blk"); if(!blk||!draggedId)return;
+  e.preventDefault();
+  const targetId=blk.dataset.id;
+  if(targetId!==draggedId){
+    const list=curList(), a=list.find(x=>x.id===draggedId), b=list.find(x=>x.id===targetId);
+    if(a&&b){ const t=a.start; a.start=b.start; b.start=t; renderTimeline(); scheduleSave(); toast("Swapped "+(a.title||"block")+" ⇄ "+(b.title||"block")); }
+  }
+  draggedId=null;
+});
+tl.addEventListener("dragend",()=>{
+  draggedId=null;
+  document.querySelectorAll(".blk.dragging,.blk.drag-over").forEach(el=>el.classList.remove("dragging","drag-over"));
+});
+
 tl.addEventListener("input",e=>{
   const card=e.target.closest(".blk"); if(!card)return;
   const b=curList().find(x=>x.id===card.dataset.id); if(!b)return;
