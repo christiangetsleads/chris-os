@@ -86,8 +86,15 @@
   .blk-time{background:rgba(255,255,255,.03);padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid var(--line);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;}
   .blk-time:active{cursor:grabbing;}
   .blk-time .grip{font-size:12px;line-height:1;letter-spacing:1px;color:var(--muted);opacity:.55;margin-bottom:7px;}
+  .blk.arming{cursor:progress;}
   .blk.dragging{opacity:.4;}
   .blk.drag-over{outline:2px dashed var(--accent);outline-offset:2px;box-shadow:0 0 26px -10px var(--accentglow);}
+  .hold-ring{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:rgba(10,12,17,.45);border-radius:12px;pointer-events:none;animation:ringfade .18s ease;}
+  @keyframes ringfade{from{opacity:0;}to{opacity:1;}}
+  .hold-ring svg{width:44px;height:44px;transform:rotate(-90deg);}
+  .hold-ring .track{fill:none;stroke:rgba(255,255,255,.12);stroke-width:3;}
+  .hold-ring .bar{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 5px var(--accentglow));animation:holdfill 1.5s linear forwards;}
+  @keyframes holdfill{to{stroke-dashoffset:0;}}
   .blk-time .start{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:18px;line-height:1;}
   .blk-time .ampm{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.05em;}
   .blk-time .dur{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);margin-top:8px;}
@@ -300,7 +307,7 @@ function sortDay(){curList().sort((a,b)=>toMin(a.start)-toMin(b.start));}
 function blockHTML(b){
   const P=PILLARS[b.pillar]; const s=fmt12(b.start);
   return `<div class="blk ${b.open?"open":""}" data-id="${b.id}" style="--c:${P.color}">
-    <div class="blk-time" title="Drag onto another block to swap times">
+    <div class="blk-time" title="Hold 2s to pick up, then drag onto another block to swap">
       <div class="grip" aria-hidden="true">⠿</div>
       <div class="start">${s.t}</div><div class="ampm">${s.ap}</div>
       <div class="dur">${durLabel(b.dur)}</div>
@@ -402,28 +409,61 @@ document.getElementById("dayTabs").addEventListener("click",e=>{
 /* ---------- events: timeline ---------- */
 const tl=document.getElementById("timeline");
 
-/* Drag a block by its time column onto another to swap their start times.
-   Pointer Events -> works with both mouse and touch. */
+/* Press & HOLD a block's time column for 2s to pick it up, then drag onto
+   another block to swap their start times. A loading ring fades in at 0.5s
+   and fills until it arms at 2s. Pointer Events -> mouse + touch. */
+const HOLD_MS=2000, LOADING_DELAY_MS=500, MOVE_CANCEL=12;
 let dragState=null;
 function blockAt(x,y){ const el=document.elementFromPoint(x,y); return el && el.closest(".blk"); }
-function clearDragHints(){ document.querySelectorAll(".blk.dragging,.blk.drag-over").forEach(el=>el.classList.remove("dragging","drag-over")); }
+function clearDragHints(){
+  document.querySelectorAll(".blk.dragging,.blk.drag-over,.blk.arming").forEach(el=>el.classList.remove("dragging","drag-over","arming"));
+  document.querySelectorAll(".hold-ring").forEach(el=>el.remove());
+}
+function teardownDrag(){
+  if(dragState){ clearTimeout(dragState.loadingTimer); clearTimeout(dragState.armTimer); }
+  window.removeEventListener("pointermove",onDragMove);
+  window.removeEventListener("pointerup",onDragEnd);
+  window.removeEventListener("pointercancel",onDragEnd);
+  document.body.style.userSelect="";
+  clearDragHints();
+  dragState=null;
+}
 
 tl.addEventListener("pointerdown",e=>{
   const handle=e.target.closest(".blk-time"); if(!handle)return;
   if(e.pointerType==="mouse" && e.button!==0) return;
   const blk=handle.closest(".blk"); if(!blk)return;
-  dragState={id:blk.dataset.id, blk, x0:e.clientX, y0:e.clientY, active:false};
+  dragState={id:blk.dataset.id, blk, x0:e.clientX, y0:e.clientY, armed:false, loadingTimer:null, armTimer:null};
+  dragState.loadingTimer=setTimeout(showHoldLoading,LOADING_DELAY_MS);
+  dragState.armTimer=setTimeout(armDrag,HOLD_MS);
   window.addEventListener("pointermove",onDragMove,{passive:false});
   window.addEventListener("pointerup",onDragEnd);
   window.addEventListener("pointercancel",onDragEnd);
 });
+function showHoldLoading(){
+  if(!dragState || dragState.armed) return;
+  dragState.blk.classList.add("arming");
+  const ring=document.createElement("div");
+  ring.className="hold-ring";
+  ring.innerHTML='<svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"></circle><circle class="bar" cx="18" cy="18" r="15.9"></circle></svg>';
+  dragState.blk.appendChild(ring);
+  dragState.ring=ring;
+}
+function armDrag(){
+  if(!dragState) return;
+  dragState.armed=true;
+  if(dragState.ring){ dragState.ring.remove(); dragState.ring=null; }
+  dragState.blk.classList.remove("arming");
+  dragState.blk.classList.add("dragging");
+  document.body.style.userSelect="none";
+  if(navigator.vibrate){ try{ navigator.vibrate(14); }catch(_){} }
+}
 function onDragMove(e){
-  if(!dragState)return;
-  if(!dragState.active){
-    if(Math.hypot(e.clientX-dragState.x0, e.clientY-dragState.y0) < 8) return; // tap/scroll threshold
-    dragState.active=true;
-    dragState.blk.classList.add("dragging");
-    document.body.style.userSelect="none";
+  if(!dragState) return;
+  if(!dragState.armed){
+    // sliding away before it arms cancels the hold (so taps/scrolls aren't hijacked)
+    if(Math.hypot(e.clientX-dragState.x0, e.clientY-dragState.y0) > MOVE_CANCEL) teardownDrag();
+    return;
   }
   e.preventDefault();
   const over=blockAt(e.clientX,e.clientY);
@@ -431,19 +471,15 @@ function onDragMove(e){
   if(over && over.dataset.id!==dragState.id) over.classList.add("drag-over");
 }
 function onDragEnd(e){
-  window.removeEventListener("pointermove",onDragMove);
-  window.removeEventListener("pointerup",onDragEnd);
-  window.removeEventListener("pointercancel",onDragEnd);
-  document.body.style.userSelect="";
-  if(dragState && dragState.active && e.type!=="pointercancel"){
+  if(!dragState){ teardownDrag(); return; }
+  if(dragState.armed && e.type!=="pointercancel"){
     const over=blockAt(e.clientX,e.clientY);
     if(over && over.dataset.id!==dragState.id){
       const list=curList(), a=list.find(x=>x.id===dragState.id), b=list.find(x=>x.id===over.dataset.id);
       if(a&&b){ const t=a.start; a.start=b.start; b.start=t; renderTimeline(); scheduleSave(); toast("Swapped "+(a.title||"block")+" ⇄ "+(b.title||"block")); }
     }
   }
-  clearDragHints();
-  dragState=null;
+  teardownDrag();
 }
 
 tl.addEventListener("input",e=>{
