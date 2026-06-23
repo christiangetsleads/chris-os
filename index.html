@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CHRIS·OS">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <title>CHRIS·OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +61,7 @@
 
   /* ---- status bar ---- */
   .statusbar{position:relative;z-index:6;display:flex;justify-content:space-between;align-items:center;
-    padding:20px 30px;gap:16px;flex-wrap:wrap;}
+    padding:20px 30px;padding-top:max(20px,env(safe-area-inset-top));gap:16px;flex-wrap:wrap;}
   .brand{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:20px;letter-spacing:.32em;color:var(--text);}
   .brand b{color:var(--gold);}
   .brand .v{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:.2em;margin-left:10px;}
@@ -118,7 +123,7 @@
 
   /* ---- footer telemetry ---- */
   .telemetry{position:relative;z-index:6;display:flex;justify-content:space-between;align-items:center;
-    padding:16px 30px;border-top:1px solid var(--line);font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;flex-wrap:wrap;gap:10px;}
+    padding:16px 30px;padding-bottom:max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--line);font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;flex-wrap:wrap;gap:10px;}
   .telemetry .pillars span{color:var(--gold);}
 
   /* ---- boot overlay ---- */
@@ -255,5 +260,15 @@
   window.CGL_APP = { gateOnly:true, bootLocal:function(){}, hydrate:function(){}, getState:function(){return{};}, setStatus:function(){} };
 </script>
 <script type="module" src="/cloud.js"></script>
+<script>
+  if (window.navigator.standalone) {
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      try { var u = new URL(a.href); if (u.origin === location.origin) { e.preventDefault(); location.href = a.href; } } catch(x){}
+    }, true);
+  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
 </body>
 </html>

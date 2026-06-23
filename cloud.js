@@ -32,15 +32,22 @@ if (!app) {
 }
 
 const CONFIGURED = app && !String(FIREBASE_CONFIG.apiKey).startsWith("PASTE_");
+// iOS home-screen PWA: popup/redirect OAuth doesn't work in standalone shell —
+// the auth redirect opens in Safari and the state never returns to the PWA.
+// Run local mode so the app isn't blocked by the gate.
+const isIOSStandalone = !!window.navigator.standalone;
 let signInHandler = null;
 
-/* ---------- LOCAL-ONLY MODE (Firebase not configured yet) ---------- */
-if (app && !CONFIGURED) {
+/* ---------- iOS STANDALONE — skip gate, use local storage ---------- */
+if (app && isIOSStandalone) {
   app.bootLocal();
 }
-
+/* ---------- LOCAL-ONLY MODE (Firebase not configured yet) ---------- */
+else if (app && !CONFIGURED) {
+  app.bootLocal();
+}
 /* ---------- CLOUD MODE ---------- */
-if (CONFIGURED) {
+else if (CONFIGURED) {
   // Show the gate immediately so no page content flashes before login.
   const gate = buildGate(() => { if (signInHandler) signInHandler(); });
   gate.show();

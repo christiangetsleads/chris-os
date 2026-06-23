@@ -1,0 +1,16 @@
+{
+  "name": "CHRIS·OS",
+  "short_name": "CHRIS·OS",
+  "description": "Operator Deck — Routine, Planner, Playbook",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0C11",
+  "theme_color": "#0A0C11",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" },
+    { "src": "/icon-180.png", "type": "image/png", "sizes": "180x180", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" }
+  ]
+}

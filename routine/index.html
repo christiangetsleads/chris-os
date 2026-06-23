@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CHRIS·OS">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <title>Routine Creator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +50,7 @@
 
   /* Masthead */
   .masthead{position:sticky;top:0;z-index:30;background:rgba(10,12,17,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(52,214,208,.12);}
-  .mast-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 22px;flex-wrap:wrap;}
+  .mast-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 22px;padding-top:max(13px,env(safe-area-inset-top));flex-wrap:wrap;}
   .brand{display:flex;align-items:center;gap:12px;font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:15px;letter-spacing:0.26em;color:var(--text);}
   .brand .home{color:var(--muted);text-decoration:none;font-size:17px;letter-spacing:0;transition:.15s;}
   .brand .home:hover{color:var(--accent);}
@@ -594,5 +599,15 @@ window.CGL_APP = { docId:"routine", bootLocal, hydrate, getState:()=>state, setS
 setInterval(markNow,30000);
 </script>
 <script type="module" src="/cloud.js"></script>
+<script>
+  if (window.navigator.standalone) {
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      try { var u = new URL(a.href); if (u.origin === location.origin) { e.preventDefault(); location.href = a.href; } } catch(x){}
+    }, true);
+  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
 </body>
 </html>
