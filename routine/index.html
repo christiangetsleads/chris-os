@@ -93,7 +93,7 @@
   @keyframes ringfade{from{opacity:0;}to{opacity:1;}}
   .hold-ring svg{width:44px;height:44px;transform:rotate(-90deg);}
   .hold-ring .track{fill:none;stroke:rgba(255,255,255,.12);stroke-width:3;}
-  .hold-ring .bar{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 5px var(--accentglow));animation:holdfill 1.5s linear forwards;}
+  .hold-ring .bar{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 5px var(--accentglow));animation:holdfill .75s linear forwards;}
   @keyframes holdfill{to{stroke-dashoffset:0;}}
   .blk-time .start{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:18px;line-height:1;}
   .blk-time .ampm{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.05em;}
@@ -307,7 +307,7 @@ function sortDay(){curList().sort((a,b)=>toMin(a.start)-toMin(b.start));}
 function blockHTML(b){
   const P=PILLARS[b.pillar]; const s=fmt12(b.start);
   return `<div class="blk ${b.open?"open":""}" data-id="${b.id}" style="--c:${P.color}">
-    <div class="blk-time" title="Hold 2s to pick up, then drag onto another block to swap">
+    <div class="blk-time" title="Hold 1s to pick up, then drag onto another block to swap">
       <div class="grip" aria-hidden="true">⠿</div>
       <div class="start">${s.t}</div><div class="ampm">${s.ap}</div>
       <div class="dur">${durLabel(b.dur)}</div>
@@ -412,7 +412,7 @@ const tl=document.getElementById("timeline");
 /* Press & HOLD a block's time column for 2s to pick it up, then drag onto
    another block to swap their start times. A loading ring fades in at 0.5s
    and fills until it arms at 2s. Pointer Events -> mouse + touch. */
-const HOLD_MS=2000, LOADING_DELAY_MS=500, MOVE_CANCEL=12;
+const HOLD_MS=1000, LOADING_DELAY_MS=250, MOVE_CANCEL=12;
 let dragState=null;
 function blockAt(x,y){ const el=document.elementFromPoint(x,y); return el && el.closest(".blk"); }
 function clearDragHints(){
