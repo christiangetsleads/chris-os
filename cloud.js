@@ -17,9 +17,15 @@
      Paste the real Firebase web config below to switch on login + sync.
    ===================================================================== */
 
+// On iOS standalone, use our own domain as authDomain so the OAuth redirect
+// comes back to chris-os.com (intercepted by the service worker) instead of
+// routing through firebaseapp.com, which causes iOS to open the return URL
+// in Mobile Safari rather than staying in the PWA shell.
+const isIOSStandalone = !!window.navigator.standalone;
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDcP0QmPEW1F5Dsz-Fw9yRlwNRvbydqqmE",
-  authDomain: "chris-os-web.firebaseapp.com",
+  authDomain: isIOSStandalone ? "chris-os.com" : "chris-os-web.firebaseapp.com",
   projectId: "chris-os-web",
   storageBucket: "chris-os-web.firebasestorage.app",
   messagingSenderId: "938683267571",
@@ -32,24 +38,19 @@ if (!app) {
 }
 
 const CONFIGURED = app && !String(FIREBASE_CONFIG.apiKey).startsWith("PASTE_");
-// iOS home-screen PWA: popup/redirect OAuth doesn't work in standalone shell —
-// the auth redirect opens in Safari and the state never returns to the PWA.
-// Run local mode so the app isn't blocked by the gate.
-const isIOSStandalone = !!window.navigator.standalone;
 let signInHandler = null;
 
-/* ---------- iOS STANDALONE — skip gate, use local storage ---------- */
-if (app && isIOSStandalone) {
-  app.bootLocal();
-}
 /* ---------- LOCAL-ONLY MODE (Firebase not configured yet) ---------- */
-else if (app && !CONFIGURED) {
+if (app && !CONFIGURED) {
   app.bootLocal();
 }
 /* ---------- CLOUD MODE ---------- */
 else if (CONFIGURED) {
-  // Show the gate immediately so no page content flashes before login.
-  const gate = buildGate(() => { if (signInHandler) signInHandler(); });
+  let gate;
+  gate = buildGate(
+    () => { if (signInHandler) signInHandler(); },
+    isIOSStandalone ? () => { gate.hide(); app.bootLocal(); } : null
+  );
   gate.show();
   bootCloud(gate).catch((err) => {
     console.error("[cloud] init failed, falling back to local:", err);
@@ -140,6 +141,12 @@ async function bootCloud(gate) {
 
   function onSignInClick() {
     gate.setBusy(true);
+    if (isIOSStandalone) {
+      // iOS standalone: skip popup attempt, go straight to redirect.
+      // The SW intercepts /__/auth/handler so the redirect stays in the PWA shell.
+      signInWithRedirect(auth, provider);
+      return;
+    }
     signInWithPopup(auth, provider).catch((err) => {
       // popup blocked or unsupported → full-page redirect
       if (
@@ -182,7 +189,7 @@ function updateUserChip(user) {
 }
 
 /* ---------- login gate UI (injected, matches CHRIS·OS HUD look) ---------- */
-function buildGate(onSignIn) {
+function buildGate(onSignIn, onSkip) {
   const el = document.createElement("div");
   el.id = "cgl-gate";
   el.innerHTML = `
@@ -206,6 +213,9 @@ function buildGate(onSignIn) {
       #cgl-gate button:disabled{opacity:.6;cursor:default;}
       #cgl-gate .err{color:#FF7A52;font-size:11px;margin-top:16px;min-height:14px;letter-spacing:.04em;line-height:1.5;}
       #cgl-gate .foot{margin-top:22px;font-size:10px;letter-spacing:.14em;color:#4f5564;text-transform:uppercase;}
+      #cgl-gate .skip{margin-top:18px;font-size:11px;letter-spacing:.06em;color:#4f5564;text-transform:uppercase;}
+      #cgl-gate .skip button{background:none;border:none;width:auto;display:inline;padding:0;color:#7E8597;font-family:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:underline;font-weight:400;}
+      #cgl-gate .skip button:hover{color:#E9E7DF;filter:none;}
     </style>
     <div class="card">
       <div class="logo">CHRIS<b>·</b>OS</div>
@@ -215,12 +225,17 @@ function buildGate(onSignIn) {
         Sign in with Google
       </button>
       <div class="err" id="cgl-err"></div>
+      ${onSkip ? '<div class="skip"><button id="cgl-skip">Continue without signing in</button></div>' : ''}
       <div class="foot">Your data syncs privately to your account</div>
     </div>`;
   document.body.appendChild(el);
   const btn = el.querySelector("#cgl-signin");
   const err = el.querySelector("#cgl-err");
   btn.addEventListener("click", onSignIn);
+  if (onSkip) {
+    const skipBtn = el.querySelector("#cgl-skip");
+    if (skipBtn) skipBtn.addEventListener("click", onSkip);
+  }
   return {
     show() { el.classList.add("on"); },
     hide() { el.classList.remove("on"); },
