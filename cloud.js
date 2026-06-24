@@ -109,7 +109,10 @@ async function bootCloud(gate) {
   };
 
   // returning from a redirect-based sign-in (mobile / popup-blocked)
-  getRedirectResult(auth).catch(() => {});
+  getRedirectResult(auth).catch((err) => {
+    console.error('[cloud] redirect sign-in failed:', err);
+    gate.setError(err.message || 'Sign-in redirect failed. Please try again.');
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -142,14 +145,11 @@ async function bootCloud(gate) {
 
   function onSignInClick() {
     gate.setBusy(true);
-    if (isIOSStandalone) {
-      // iOS standalone: skip popup attempt, go straight to redirect.
-      // The SW intercepts /__/auth/handler so the redirect stays in the PWA shell.
-      signInWithRedirect(auth, provider);
-      return;
-    }
+    // Try popup first — works on iOS 16.4+ standalone and all desktop browsers.
+    // If popup is blocked/unsupported, fall back to redirect. On iOS the redirect
+    // stays within the PWA WKWebView because authDomain is chris-os.com and the
+    // SW proxies /__/auth/* to Firebase Hosting's real handler.
     signInWithPopup(auth, provider).catch((err) => {
-      // popup blocked or unsupported → full-page redirect
       if (
         err && (err.code === "auth/popup-blocked" ||
         err.code === "auth/cancelled-popup-request" ||
