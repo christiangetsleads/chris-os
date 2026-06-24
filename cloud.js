@@ -17,15 +17,11 @@
      Paste the real Firebase web config below to switch on login + sync.
    ===================================================================== */
 
-// On iOS standalone, use our own domain as authDomain so the OAuth redirect
-// comes back to chris-os.com (intercepted by the service worker) instead of
-// routing through firebaseapp.com, which causes iOS to open the return URL
-// in Mobile Safari rather than staying in the PWA shell.
 const isIOSStandalone = !!window.navigator.standalone;
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDcP0QmPEW1F5Dsz-Fw9yRlwNRvbydqqmE",
-  authDomain: isIOSStandalone ? "chris-os.com" : "chris-os-web.firebaseapp.com",
+  authDomain: "chris-os-web.firebaseapp.com",
   projectId: "chris-os-web",
   storageBucket: "chris-os-web.firebasestorage.app",
   messagingSenderId: "938683267571",
