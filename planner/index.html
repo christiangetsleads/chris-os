@@ -685,52 +685,54 @@ function renderPillarModal(){
     });
   });
 
-  card.querySelectorAll(".swatch").forEach(sw=>{
-    sw.addEventListener("click",()=>{
-      draftColor=sw.dataset.clr;
-      card.querySelectorAll(".swatch").forEach(s=>s.classList.toggle("on",s.dataset.clr===draftColor));
+  if(pilFormOpen){
+    card.querySelectorAll(".swatch").forEach(sw=>{
+      sw.addEventListener("click",()=>{
+        draftColor=sw.dataset.clr;
+        card.querySelectorAll(".swatch").forEach(s=>s.classList.toggle("on",s.dataset.clr===draftColor));
+      });
     });
-  });
 
-  const typesEl=card.querySelector("#pf-types");
-  typesEl.addEventListener("click",e=>{
-    const rx=e.target.closest(".type-rx"); if(!rx)return;
-    draftTypes.splice(parseInt(rx.dataset.tidx),1);
-    typesEl.innerHTML=typeChipsHtml();
-  });
+    const typesEl=card.querySelector("#pf-types");
+    typesEl.addEventListener("click",e=>{
+      const rx=e.target.closest(".type-rx"); if(!rx)return;
+      draftTypes.splice(parseInt(rx.dataset.tidx),1);
+      typesEl.innerHTML=typeChipsHtml();
+    });
 
-  const typeIn=card.querySelector("#pf-type-in");
-  const addType=()=>{
-    const val=typeIn.value.trim();
-    if(!val){ typeIn.focus(); return; }
-    if(draftTypes.includes(val)){ toast("Already added"); typeIn.focus(); return; }
-    draftTypes.push(val); typesEl.innerHTML=typeChipsHtml(); typeIn.value=""; typeIn.focus();
-  };
-  card.querySelector("#pf-type-add").addEventListener("click",addType);
-  typeIn.addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();addType();} });
+    const typeIn=card.querySelector("#pf-type-in");
+    const addType=()=>{
+      const val=typeIn.value.trim();
+      if(!val){ typeIn.focus(); return; }
+      if(draftTypes.includes(val)){ toast("Already added"); typeIn.focus(); return; }
+      draftTypes.push(val); typesEl.innerHTML=typeChipsHtml(); typeIn.value=""; typeIn.focus();
+    };
+    card.querySelector("#pf-type-add").addEventListener("click",addType);
+    typeIn.addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();addType();} });
 
-  card.querySelector("#pf-cancel").addEventListener("click",()=>{
-    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false; renderPillarModal();
-  });
+    card.querySelector("#pf-cancel").addEventListener("click",()=>{
+      editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false; renderPillarModal();
+    });
 
-  card.querySelector("#pf-save").addEventListener("click",()=>{
-    const label=card.querySelector("#pf-label").value.trim();
-    const role=card.querySelector("#pf-role").value.trim();
-    const base=Math.max(0,parseInt(card.querySelector("#pf-base").value)||0);
-    const push=Math.max(0,parseInt(card.querySelector("#pf-push").value)||0);
-    if(!label){ card.querySelector("#pf-label").focus(); toast("Name required"); return; }
-    if(!state.pillars) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
-    if(editingPillarKey){
-      const idx=state.pillars.findIndex(p=>p.key===editingPillarKey);
-      if(idx>=0) state.pillars[idx]={...state.pillars[idx],label,role,color:draftColor,types:[...draftTypes],base,push};
-      toast(`"${label}" updated`);
-    } else {
-      state.pillars.push({key:"pl_"+Math.random().toString(36).slice(2,8),label,role,color:draftColor,types:[...draftTypes],base,push});
-      toast(`"${label}" added`);
-    }
-    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false;
-    renderPillarModal(); renderBoard(); scheduleSave();
-  });
+    card.querySelector("#pf-save").addEventListener("click",()=>{
+      const label=card.querySelector("#pf-label").value.trim();
+      const role=card.querySelector("#pf-role").value.trim();
+      const base=Math.max(0,parseInt(card.querySelector("#pf-base").value)||0);
+      const push=Math.max(0,parseInt(card.querySelector("#pf-push").value)||0);
+      if(!label){ card.querySelector("#pf-label").focus(); toast("Name required"); return; }
+      if(!state.pillars) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
+      if(editingPillarKey){
+        const idx=state.pillars.findIndex(p=>p.key===editingPillarKey);
+        if(idx>=0) state.pillars[idx]={...state.pillars[idx],label,role,color:draftColor,types:[...draftTypes],base,push};
+        toast(`"${label}" updated`);
+      } else {
+        state.pillars.push({key:"pl_"+Math.random().toString(36).slice(2,8),label,role,color:draftColor,types:[...draftTypes],base,push});
+        toast(`"${label}" added`);
+      }
+      editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false;
+      renderPillarModal(); renderBoard(); scheduleSave();
+    });
+  }
 
   document.getElementById("pilModal").addEventListener("click",e=>{
     if(e.target===document.getElementById("pilModal")) closePillarModal();
