@@ -1,4 +1,4 @@
-const CACHE = 'chris-os-v4';
+const CACHE = 'chris-os-v5';
 const ASSETS = [
   '/', '/routine/', '/planner/', '/playbook/',
   '/cloud.js', '/manifest.json', '/icon.svg', '/icon-180.png', '/icon-512.png'
@@ -19,21 +19,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-
-  // Proxy /__/auth/* to Firebase Hosting so the real, version-matched auth
-  // handler runs at our domain. This keeps iOS PWA in the WKWebView shell
-  // (redirect returns to chris-os.com, not firebaseapp.com) while letting
-  // Firebase's actual handler.js exchange the OAuth code correctly.
-  if (url.origin === self.location.origin && url.pathname.startsWith('/__/auth/')) {
-    const upstream = new URL(e.request.url);
-    upstream.hostname = 'chris-os-web.firebaseapp.com';
-    e.respondWith(
-      fetch(upstream.toString())
-        .catch(() => new Response('Auth handler unavailable', { status: 503 }))
-    );
-    return;
-  }
-
   if (url.origin !== self.location.origin) return;
   e.respondWith(
     caches.match(e.request).then(hit => {
