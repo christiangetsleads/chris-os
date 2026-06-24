@@ -18,7 +18,6 @@
     --gold:#E6B84D; --cyan:#34D6D0; --coral:#FF7A52;
     --text:#E9E7DF; --muted:#7E8597; --line:rgba(230,184,77,.16);
     --accent:#E6B84D; --accentglow:rgba(230,184,77,.5);
-    --spine:#E6B84D; --faith:#7C82E8; --fitness:#FF7A52; --family:#46C89B;
     --ok:#34D6D0; --warn:#FF7A52;
   }
   *{box-sizing:border-box;}
@@ -74,7 +73,7 @@
   .meter-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
   .meter-head .eyebrow{color:var(--accent);}
   .meter-head .total{font-family:"Space Mono",monospace;font-size:12px;color:var(--muted);letter-spacing:0.06em;}
-  .meter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;}
+  .meter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:16px;}
   .gauge{background:linear-gradient(160deg,var(--panel),rgba(10,12,17,.6));border:1px solid var(--line);border-radius:12px;padding:14px 16px;border-top:3px solid var(--c);}
   .gauge .gname{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
   .gauge .gcount{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:30px;margin-top:4px;line-height:1;}
@@ -114,7 +113,6 @@
   .chip{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;}
   .chip.day{background:rgba(255,255,255,.06);color:var(--text);font-weight:700;border:1px solid var(--line);}
   .chip.pillar{background:var(--c);color:#0A0C11;font-weight:700;}
-  .chip.pillar.spine{color:#1A1407;}
   .p-head .ttl{flex:1;font-size:15px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .p-head .ttl.has{color:var(--text);}
   .status-dot{width:10px;height:10px;border-radius:50%;background:#3A3F4D;flex-shrink:0;}
@@ -152,8 +150,48 @@
   .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);color:var(--text);padding:12px 20px;border-radius:10px;font-family:"Space Mono",monospace;font-size:12px;letter-spacing:0.06em;opacity:0;pointer-events:none;transition:.25s;z-index:50;border:1px solid var(--accent);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* Pillar Manager */
+  .pil-modal{position:fixed;inset:0;z-index:9998;display:none;align-items:flex-start;justify-content:center;background:rgba(10,12,17,.92);padding:20px 16px;overflow-y:auto;}
+  .pil-modal.on{display:flex;}
+  .pil-card{width:min(560px,96vw);background:linear-gradient(160deg,#141826,rgba(10,12,17,.8));border:1px solid rgba(230,184,77,.22);border-top:2px solid var(--accent);border-radius:16px;padding:28px 24px;margin:auto;}
+  .pil-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .pil-hd h2{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:var(--text);margin:0;}
+  .pil-close-btn{font-size:18px;color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:5px;transition:.12s;line-height:1;}
+  .pil-close-btn:hover{color:var(--text);}
+  .pil-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .pil-row{display:flex;align-items:center;gap:10px;padding:11px 12px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:8px;transition:.12s;}
+  .pil-row.pil-editing{border-color:var(--accent);}
+  .pil-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .pil-info{flex:1;min-width:0;}
+  .pil-lbl{font-size:13px;font-weight:700;color:var(--text);}
+  .pil-rl{font-size:11px;letter-spacing:.04em;color:var(--muted);}
+  .pil-cnt{font-size:11px;color:var(--muted);white-space:nowrap;margin-right:2px;}
+  .pil-act{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid var(--line);color:var(--muted);background:transparent;cursor:pointer;transition:.12s;}
+  .pil-act:hover{color:var(--accent);border-color:var(--accent);}
+  .pil-act.del:hover{color:var(--coral);border-color:var(--coral);}
+  .pil-divider{border:none;border-top:1px solid var(--line);margin:4px 0 20px;}
+  .pil-form-title{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+  .pil-form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .pil-form-row .field{flex:1;min-width:140px;}
+  .palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;transition:.12s;flex-shrink:0;outline:2px solid transparent;outline-offset:3px;}
+  .swatch.on{outline-color:rgba(255,255,255,.75);}
+  .swatch:hover{transform:scale(1.18);}
+  .types-area{margin-bottom:12px;}
+  .types-lbl{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+  .type-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:20px;}
+  .type-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:5px;padding:4px 8px;font-family:"Space Mono",monospace;}
+  .type-rx{padding:0 1px;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;background:none;border:none;font-family:inherit;}
+  .type-rx:hover{color:var(--coral);}
+  .type-add-row{display:flex;gap:8px;align-items:center;}
+  .type-add-row .txt{flex:1;}
+  .tgt-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;margin-bottom:14px;}
+  .tgt-row .field{flex:1;min-width:100px;}
+  .tgt-inp{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg2);color:var(--text);width:100%;font-family:"Space Mono",monospace;font-size:14px;}
+  .tgt-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accentglow);}
+  .pil-form-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+
   @media (max-width:760px){
-    .meter-grid{grid-template-columns:repeat(2,1fr);}
     .masthead .wrap{padding:12px 16px;}
     .brand{letter-spacing:.18em;font-size:14px;}
   }
@@ -183,8 +221,8 @@
 <div class="meter-sec">
   <div class="wrap">
     <div class="meter-head">
-      <div class="eyebrow">Weekly plan · goal 15+ posts · ratio 60·15·13·12</div>
-      <div class="total mono" id="totalLine">0 of 35 planned</div>
+      <div class="eyebrow" id="ratioLine">Weekly plan</div>
+      <div class="total mono" id="totalLine">0 planned</div>
     </div>
     <div class="meter-grid" id="meterGrid"></div>
   </div>
@@ -194,6 +232,7 @@
   <div class="toolbar">
     <button class="btn primary" id="addBtn">+ Add video</button>
     <button class="btn" id="seedBtn">Load 15-video week</button>
+    <button class="btn ghost" id="pillarBtn">Pillars</button>
     <div class="spacer"></div>
     <button class="btn ghost" id="exportBtn">Export markdown</button>
     <button class="btn ghost" id="backupBtn">Backup</button>
@@ -205,29 +244,23 @@
   <div class="board" id="board"></div>
 </div>
 
+<!-- Pillar Manager Modal -->
+<div class="pil-modal" id="pilModal">
+  <div class="pil-card" id="pilCard"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ---------- config ---------- */
-const PILLARS = {
-  spine:   {label:"Lead Gen", role:"Authority", color:"var(--spine)",  cls:"spine"},
-  faith:   {label:"Faith",    role:"Faith",     color:"var(--faith)",  cls:"faith"},
-  fitness: {label:"Fitness",  role:"Discipline",color:"var(--fitness)",cls:"fitness"},
-  family:  {label:"Family",   role:"Legacy",    color:"var(--family)", cls:"family"},
-};
-const TYPES = {
-  spine:   ["Educational how to","Ad teardown","Client win / proof","Hot take / myth bust","Offer / CTA"],
-  faith:   ["Principle in practice","Sunday reflection"],
-  fitness: ["Discipline parallel","Routine / system"],
-  family:  ["The why / legacy","Real life behind the scenes"],
-};
-// Weekly post-count goals. "base" is the floor (15+/week); "push" is the stretch.
-const TARGETS = {
-  base: {total:15, spine:9,  faith:2, fitness:2, family:2},
-  push: {total:21, spine:13, faith:3, fitness:3, family:2},
-};
+/* ---------- defaults ---------- */
+const DEFAULT_PILLARS = [
+  {key:"spine",  label:"Lead Gen",  role:"Authority",   color:"#E6B84D", types:["Educational how to","Ad teardown","Client win / proof","Hot take / myth bust","Offer / CTA"],   base:9,  push:13},
+  {key:"faith",  label:"Faith",     role:"Faith",       color:"#7C82E8", types:["Principle in practice","Sunday reflection"],                                                     base:2,  push:3},
+  {key:"fitness",label:"Fitness",   role:"Discipline",  color:"#FF7A52", types:["Discipline parallel","Routine / system"],                                                         base:2,  push:3},
+  {key:"family", label:"Family",    role:"Legacy",      color:"#46C89B", types:["The why / legacy","Real life behind the scenes"],                                                base:2,  push:2},
+];
+const PALETTE = ["#E6B84D","#7C82E8","#FF7A52","#46C89B","#34D6D0","#C87CE8","#E87C7C","#7CE8C8","#E8C87C","#7C9AE8"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-// Default week: 15 posts, multiple videos on several days, holding the 60/15/13/12 mix.
 const SKELETON = [
   {day:"Mon",pillar:"spine",  type:"Ad teardown"},
   {day:"Mon",pillar:"spine",  type:"Educational how to"},
@@ -247,17 +280,22 @@ const SKELETON = [
 ];
 
 /* ---------- state ---------- */
-let state = { week:"", volume:"base", pieces:[] };
+let state = { week:"", volume:"base", pieces:[], pillars:null };
 let nextId = 1;
 const uid = () => "p"+(nextId++)+"_"+Math.random().toString(36).slice(2,6);
 
-/* ---------- persistence (localStorage, graceful) ---------- */
+/* ---------- pillar helpers ---------- */
+function pillarList(){ return (state.pillars && state.pillars.length) ? state.pillars : DEFAULT_PILLARS; }
+function getPillar(key){ return pillarList().find(p=>p.key===key) || {key:key||"?",label:key||"?",role:"",color:"#7E8597",types:[],base:0,push:0}; }
+function getTypes(key){ return getPillar(key).types || []; }
+
+/* ---------- persistence ---------- */
 const KEY = "cgl-planner-state-v1";
 let canStore = (function(){try{localStorage.setItem("__cgl_t","1");localStorage.removeItem("__cgl_t");return true;}catch(e){return false;}})();
 let saveTimer = null;
 
 function loadState(){
-  if(!canStore) { setSave("in memory"); return; }
+  if(!canStore){ setSave("in memory"); return; }
   try{
     const raw = localStorage.getItem(KEY);
     if(raw){
@@ -269,6 +307,9 @@ function loadState(){
       }
     }
   }catch(e){ /* fresh */ }
+  if(!state.pillars || !Array.isArray(state.pillars) || state.pillars.length===0){
+    state.pillars = DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
+  }
   setSave("saved");
 }
 function scheduleSave(){
@@ -300,16 +341,23 @@ function toast(msg){
 
 /* ---------- meter ---------- */
 function renderMeter(){
-  const tgt = TARGETS[state.volume] || TARGETS.base;
-  const counts = {spine:0,faith:0,fitness:0,family:0};
+  const pils = pillarList();
+  const vol = state.volume==="push" ? "push" : "base";
+  const totalTarget = pils.reduce((s,p)=>s+(p[vol]||0),0);
+
+  const ratioEl = document.getElementById("ratioLine");
+  if(ratioEl) ratioEl.textContent = `Weekly plan · goal ${totalTarget}+ posts`;
+
+  const counts = {};
+  pils.forEach(p=>counts[p.key]=0);
   state.pieces.forEach(p=>{ if(counts[p.pillar]!=null) counts[p.pillar]++; });
-  const grid = document.getElementById("meterGrid");
-  grid.innerHTML = Object.keys(PILLARS).map(k=>{
-    const P=PILLARS[k], have=counts[k], need=tgt[k];
-    const pctFill=Math.min(100, need? (have/need*100):0);
+
+  document.getElementById("meterGrid").innerHTML = pils.map(P=>{
+    const have=counts[P.key]||0, need=P[vol]||0;
+    const pctFill=Math.min(100, need?(have/need*100):0);
     let cls="good", txt="on target";
     if(have<need){cls="under";txt="add "+(need-have);}
-    else if(have>need){cls=(k==="spine")?"good":"over";txt=(k==="spine")?"on target":("over by "+(have-need));}
+    else if(have>need){cls="over";txt="over by "+(have-need);}
     return `<div class="gauge" style="--c:${P.color}">
       <div class="gname">${P.label}</div>
       <div class="gcount">${have}<em> / ${need}</em></div>
@@ -317,24 +365,25 @@ function renderMeter(){
       <div class="gstat ${cls}">${txt}</div>
     </div>`;
   }).join("");
-  const planned = state.pieces.length, totalEl = document.getElementById("totalLine");
-  if(planned >= tgt.total){ totalEl.textContent = planned+" planned · goal hit ✓"; totalEl.classList.add("hit"); }
-  else { totalEl.textContent = planned+" of "+tgt.total+" · "+(tgt.total-planned)+" to goal"; totalEl.classList.remove("hit"); }
+
+  const planned=state.pieces.length, totalEl=document.getElementById("totalLine");
+  if(planned>=totalTarget){ totalEl.textContent=planned+" planned · goal hit ✓"; totalEl.classList.add("hit"); }
+  else{ totalEl.textContent=planned+" of "+totalTarget+" · "+(totalTarget-planned)+" to goal"; totalEl.classList.remove("hit"); }
 }
 
 /* ---------- card ---------- */
 function cardHTML(p){
-  const P=PILLARS[p.pillar];
+  const P=getPillar(p.pillar);
   const opts=DAYS.map(d=>`<option ${d===p.day?"selected":""}>${d}</option>`).join("");
-  const pillOpts=Object.keys(PILLARS).map(k=>`<option value="${k}" ${k===p.pillar?"selected":""}>${PILLARS[k].label}</option>`).join("");
-  const typeOpts=(TYPES[p.pillar]||[]).map(t=>`<option ${t===p.type?"selected":""}>${t}</option>`).join("");
-  const titleTxt = p.hook ? p.hook : (p.type||"Untitled piece");
+  const pillOpts=pillarList().map(pl=>`<option value="${pl.key}" ${pl.key===p.pillar?"selected":""}>${pl.label}</option>`).join("");
+  const typeOpts=(getTypes(p.pillar)||[]).map(t=>`<option ${t===p.type?"selected":""}>${t}</option>`).join("");
+  const titleTxt=p.hook?p.hook:(p.type||"Untitled piece");
   const wc=wordCount(p.script||""), hc=(p.hook||"").length;
   return `
   <div class="piece ${p.open?"open":""}" data-id="${p.id}" style="--c:${P.color}">
     <div class="p-head" data-act="toggle">
       <span class="chip day">${p.day}</span>
-      <span class="chip pillar ${P.cls}">${P.label}</span>
+      <span class="chip pillar">${P.label}</span>
       <span class="ttl ${p.hook?"has":""}">${escapeHtml(titleTxt)}</span>
       <span class="status-dot ${p.status}" title="${p.status}"></span>
       <span class="caret">▶</span>
@@ -345,23 +394,19 @@ function cardHTML(p){
         <div class="field grow"><label>Pillar</label><select class="sel" data-f="pillar">${pillOpts}</select></div>
         <div class="field grow"><label>Type</label><select class="sel" data-f="type">${typeOpts}</select></div>
       </div>
-
       <div class="field" style="margin-top:14px">
         <label>Hook <span class="counter ${hookCls(hc)}" data-c="hook">${hc}/125</span></label>
         <input class="txt" data-f="hook" value="${escapeAttr(p.hook||"")}" placeholder="Bold scroll stopper, under 125 characters">
         <p class="hint">One punchy line. No dashes. Make a business owner stop.</p>
       </div>
-
       <div class="field" style="margin-top:14px">
         <label>Script <span class="counter ${wcCls(wc)}" data-c="script">${wc} words · aim 150-220</span> <span class="flag" data-flag="script" style="${hasDash(p.script||"")?"":"display:none"}">dash detected</span></label>
         <textarea class="area script" data-f="script" placeholder="Extract the core lesson. Do not retell the story. Short spaced paragraphs.">${escapeHtml(p.script||"")}</textarea>
       </div>
-
       <div class="field" style="margin-top:14px">
         <label>CTA <span class="flag" data-flag="cta" style="${hasDash(p.cta||"")?"":"display:none"}">dash detected</span></label>
         <input class="txt" data-f="cta" value="${escapeAttr(p.cta||"")}" placeholder='Comment driver. e.g. Comment "LEADS" and I will send it'>
       </div>
-
       <div class="p-foot">
         <div class="statseg" data-f="status">
           <button data-s="idea" class="${p.status==="idea"?"on":""}">Idea</button>
@@ -378,14 +423,11 @@ function wcCls(n){ if(n===0)return""; if(n>=150&&n<=220)return"good"; return"war
 function escapeHtml(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 function escapeAttr(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
 
-/* ---------- render board (grouped by day, multiple videos per day) ---------- */
+/* ---------- render board ---------- */
 function renderBoard(){
-  const board=document.getElementById("board");
-  board.innerHTML = DAYS.map(d=>{
-    const dayPieces = state.pieces.filter(p=>p.day===d);
-    const cards = dayPieces.length
-      ? dayPieces.map(cardHTML).join("")
-      : `<div class="day-empty">No videos yet</div>`;
+  document.getElementById("board").innerHTML = DAYS.map(d=>{
+    const dayPieces=state.pieces.filter(p=>p.day===d);
+    const cards=dayPieces.length?dayPieces.map(cardHTML).join(""):`<div class="day-empty">No videos yet</div>`;
     return `<div class="day-group">
       <div class="day-head">
         <span class="day-name">${d}</span>
@@ -398,7 +440,7 @@ function renderBoard(){
   renderMeter();
 }
 
-/* ---------- in-place updates (keep focus) ---------- */
+/* ---------- in-place updates ---------- */
 function updateCounter(card,p){
   const hc=(p.hook||"").length, wc=wordCount(p.script||"");
   const hCo=card.querySelector('[data-c="hook"]'); if(hCo){hCo.textContent=hc+"/125";hCo.className="counter "+hookCls(hc);}
@@ -408,7 +450,7 @@ function updateCounter(card,p){
   const ttl=card.querySelector(".ttl"); if(ttl){ttl.textContent=p.hook?p.hook:(p.type||"Untitled piece");ttl.classList.toggle("has",!!p.hook);}
 }
 
-/* ---------- events ---------- */
+/* ---------- board events ---------- */
 document.getElementById("board").addEventListener("input",e=>{
   const card=e.target.closest(".piece"); if(!card)return;
   const p=get(card.dataset.id); if(!p)return;
@@ -423,10 +465,10 @@ document.getElementById("board").addEventListener("change",e=>{
   if(f==="type"){ p.type=e.target.value; updateCounter(card,p); scheduleSave(); }
   if(f==="pillar"){
     p.pillar=e.target.value;
-    if(!TYPES[p.pillar].includes(p.type)) p.type=TYPES[p.pillar][0];
+    const types=getTypes(p.pillar);
+    if(!types.includes(p.type)) p.type=types[0]||"";
     p.open=true;
-    card.outerHTML=cardHTML(p);
-    renderMeter(); scheduleSave();
+    renderBoard(); scheduleSave();
   }
 });
 document.getElementById("board").addEventListener("click",e=>{
@@ -453,7 +495,10 @@ document.getElementById("board").addEventListener("click",e=>{
 
 /* ---------- toolbar ---------- */
 function newPiece(seed={}){
-  return {id:uid(),day:seed.day||"Mon",pillar:seed.pillar||"spine",type:seed.type||TYPES[seed.pillar||"spine"][0],hook:"",script:"",cta:"",status:"idea",open:true};
+  const first=pillarList()[0]||{key:"spine",types:[]};
+  const pilKey=seed.pillar||first.key;
+  const types=getTypes(pilKey);
+  return {id:uid(),day:seed.day||"Mon",pillar:pilKey,type:seed.type||types[0]||"",hook:"",script:"",cta:"",status:"idea",open:true};
 }
 function addPieceToDay(day){
   const p=newPiece({day}); state.pieces.push(p);
@@ -463,13 +508,15 @@ function addPieceToDay(day){
 document.getElementById("addBtn").addEventListener("click",()=>addPieceToDay("Mon"));
 document.getElementById("seedBtn").addEventListener("click",()=>{
   if(state.pieces.length && !confirm("Add the 15-video starter week to your current videos?")) return;
-  SKELETON.forEach(s=>state.pieces.push(newPiece({...s, open:false})));
+  const validKeys=new Set(pillarList().map(p=>p.key));
+  SKELETON.forEach(s=>{ if(validKeys.has(s.pillar)) state.pieces.push(newPiece({...s,open:false})); });
   state.pieces.forEach(p=>p.open=false);
   renderBoard(); scheduleSave(); toast("Starter week loaded");
 });
 document.getElementById("clearBtn").addEventListener("click",()=>{
   if(confirm("Clear all pieces? Export first if you want to keep them.")){ state.pieces=[]; renderBoard(); scheduleSave(); }
 });
+document.getElementById("pillarBtn").addEventListener("click",()=>openPillarModal(null));
 
 /* volume + week */
 document.getElementById("volToggle").addEventListener("click",e=>{
@@ -480,19 +527,15 @@ document.getElementById("volToggle").addEventListener("click",e=>{
 });
 document.getElementById("weekIn").addEventListener("input",e=>{ state.week=e.target.value; scheduleSave(); });
 
-/* ---------- export markdown ---------- */
+/* ---------- export ---------- */
 document.getElementById("exportBtn").addEventListener("click",()=>{
   const order={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
   const sorted=[...state.pieces].sort((a,b)=>(order[a.day]-order[b.day]));
-  let md=`# ChristianGetsLeads Content Plan\n`;
-  md+=`Week: ${state.week||"(untitled)"}  ·  Volume: ${state.volume==="full"?"Full 35":"Lean 20"}  ·  ${state.pieces.length} pieces\n\n`;
+  let md=`# ChristianGetsLeads Content Plan\nWeek: ${state.week||"(untitled)"}  ·  Volume: ${state.volume==="push"?"Push 21":"Base 15"}  ·  ${state.pieces.length} pieces\n\n`;
   let curDay="";
   sorted.forEach(p=>{
     if(p.day!==curDay){ md+=`\n## ${p.day}\n\n`; curDay=p.day; }
-    md+=`### ${PILLARS[p.pillar].label} — ${p.type}  \`${p.status}\`\n\n`;
-    md+=`**Hook:** ${p.hook||"_(empty)_"}\n\n`;
-    md+=`**Script:**\n\n${p.script||"_(empty)_"}\n\n`;
-    md+=`**CTA:** ${p.cta||"_(empty)_"}\n\n---\n\n`;
+    md+=`### ${getPillar(p.pillar).label} — ${p.type}  \`${p.status}\`\n\n**Hook:** ${p.hook||"_(empty)_"}\n\n**Script:**\n\n${p.script||"_(empty)_"}\n\n**CTA:** ${p.cta||"_(empty)_"}\n\n---\n\n`;
   });
   download((state.week||"cgl-plan").replace(/\s+/g,"-").toLowerCase()+".md", md, "text/markdown");
   toast("Markdown exported");
@@ -519,9 +562,175 @@ function download(name,content,mime){
   setTimeout(()=>URL.revokeObjectURL(url),500);
 }
 
+/* ---------- pillar manager ---------- */
+let editingPillarKey=null, draftTypes=[], draftColor=PALETTE[0];
+
+function openPillarModal(editKey){
+  if(editKey){
+    editingPillarKey=editKey;
+    const p=getPillar(editKey);
+    draftTypes=[...(p.types||[])];
+    draftColor=p.color||PALETTE[0];
+  } else {
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+  }
+  renderPillarModal();
+  document.getElementById("pilModal").classList.add("on");
+}
+
+function closePillarModal(){
+  document.getElementById("pilModal").classList.remove("on");
+  editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+}
+
+function renderPillarModal(){
+  const pils=pillarList();
+  const card=document.getElementById("pilCard");
+
+  const typeChipsHtml=()=>draftTypes.map((t,i)=>
+    `<span class="type-chip">${escapeHtml(t)}<button class="type-rx" data-tidx="${i}" title="Remove">×</button></span>`
+  ).join("");
+
+  const pilRows=pils.map(p=>{
+    const cnt=state.pieces.filter(x=>x.pillar===p.key).length;
+    const isEd=editingPillarKey===p.key;
+    return `<div class="pil-row${isEd?" pil-editing":""}">
+      <span class="pil-dot" style="background:${p.color}"></span>
+      <div class="pil-info">
+        <div class="pil-lbl">${escapeHtml(p.label)}</div>
+        ${p.role?`<div class="pil-rl">${escapeHtml(p.role)}</div>`:""}
+      </div>
+      <span class="pil-cnt">${cnt} ${cnt===1?"video":"videos"}</span>
+      <button class="pil-act" data-pil-edit="${escapeAttr(p.key)}">${isEd?"Editing…":"Edit"}</button>
+      <button class="pil-act del" data-pil-del="${escapeAttr(p.key)}">Delete</button>
+    </div>`;
+  }).join("");
+
+  const isEdit=!!editingPillarKey;
+  const editP=isEdit?getPillar(editingPillarKey):null;
+
+  card.innerHTML=`
+    <div class="pil-hd">
+      <h2>Manage Pillars</h2>
+      <button class="pil-close-btn" id="pilCloseBtn">✕</button>
+    </div>
+    <div class="pil-list">${pilRows}</div>
+    <hr class="pil-divider">
+    <div class="pil-form-title">${isEdit?"EDIT PILLAR":"ADD PILLAR"}</div>
+    <div class="pil-form-row">
+      <div class="field"><label>Name</label><input class="txt" id="pf-label" value="${escapeAttr(editP?editP.label:"")}" placeholder="e.g. Business" maxlength="32"></div>
+      <div class="field"><label>Role</label><input class="txt" id="pf-role" value="${escapeAttr(editP?editP.role:"")}" placeholder="e.g. Strategy" maxlength="32"></div>
+    </div>
+    <div class="field" style="margin-bottom:14px">
+      <label>Color</label>
+      <div class="palette" id="pf-palette">${PALETTE.map(c=>`<span class="swatch${c===draftColor?" on":""}" style="background:${c}" data-clr="${escapeAttr(c)}" title="${escapeAttr(c)}"></span>`).join("")}</div>
+    </div>
+    <div class="types-area">
+      <span class="types-lbl">Content Types</span>
+      <div class="type-chips" id="pf-types">${typeChipsHtml()}</div>
+      <div class="type-add-row">
+        <input class="txt" id="pf-type-in" placeholder="Add a content type…" maxlength="60">
+        <button class="btn ghost" id="pf-type-add" style="padding:10px 14px;white-space:nowrap">+ Add</button>
+      </div>
+    </div>
+    <div class="tgt-row">
+      <div class="field"><label>Base target / wk</label><input class="tgt-inp" type="number" id="pf-base" value="${editP!=null?(editP.base??2):2}" min="0" max="99"></div>
+      <div class="field"><label>Push target / wk</label><input class="tgt-inp" type="number" id="pf-push" value="${editP!=null?(editP.push??3):3}" min="0" max="99"></div>
+    </div>
+    <div class="pil-form-btns">
+      <button class="btn ghost" id="pf-cancel">${isEdit?"Cancel edit":"Clear"}</button>
+      <button class="btn primary" id="pf-save">${isEdit?"Save changes":"Add Pillar"}</button>
+    </div>
+  `;
+
+  card.querySelector("#pilCloseBtn").addEventListener("click",closePillarModal);
+
+  card.querySelectorAll("[data-pil-edit]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const key=btn.dataset.pilEdit;
+      if(editingPillarKey===key){ editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; }
+      else { editingPillarKey=key; const p=getPillar(key); draftTypes=[...(p.types||[])]; draftColor=p.color||PALETTE[0]; }
+      renderPillarModal();
+    });
+  });
+
+  card.querySelectorAll("[data-pil-del]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const key=btn.dataset.pilDel;
+      const P=getPillar(key);
+      const cnt=state.pieces.filter(x=>x.pillar===key).length;
+      const fallback=pillarList().find(p=>p.key!==key);
+      const warn=cnt>0?` ${cnt} video${cnt>1?"s":""} will be reassigned to "${fallback?fallback.label:"(none)"}".`:"";
+      if(!confirm(`Delete "${P.label}"?${warn}`)) return;
+      if(!state.pillars) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
+      if(cnt>0&&fallback){
+        state.pieces.forEach(p=>{
+          if(p.pillar===key){ p.pillar=fallback.key; if(!getTypes(fallback.key).includes(p.type)) p.type=getTypes(fallback.key)[0]||""; }
+        });
+      }
+      state.pillars=state.pillars.filter(p=>p.key!==key);
+      if(editingPillarKey===key){ editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; }
+      renderPillarModal(); renderBoard(); scheduleSave();
+      toast(`"${P.label}" deleted`);
+    });
+  });
+
+  card.querySelectorAll(".swatch").forEach(sw=>{
+    sw.addEventListener("click",()=>{
+      draftColor=sw.dataset.clr;
+      card.querySelectorAll(".swatch").forEach(s=>s.classList.toggle("on",s.dataset.clr===draftColor));
+    });
+  });
+
+  const typesEl=card.querySelector("#pf-types");
+  typesEl.addEventListener("click",e=>{
+    const rx=e.target.closest(".type-rx"); if(!rx)return;
+    draftTypes.splice(parseInt(rx.dataset.tidx),1);
+    typesEl.innerHTML=typeChipsHtml();
+  });
+
+  const typeIn=card.querySelector("#pf-type-in");
+  const addType=()=>{
+    const val=typeIn.value.trim();
+    if(!val){ typeIn.focus(); return; }
+    if(draftTypes.includes(val)){ toast("Already added"); typeIn.focus(); return; }
+    draftTypes.push(val); typesEl.innerHTML=typeChipsHtml(); typeIn.value=""; typeIn.focus();
+  };
+  card.querySelector("#pf-type-add").addEventListener("click",addType);
+  typeIn.addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();addType();} });
+
+  card.querySelector("#pf-cancel").addEventListener("click",()=>{
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; renderPillarModal();
+  });
+
+  card.querySelector("#pf-save").addEventListener("click",()=>{
+    const label=card.querySelector("#pf-label").value.trim();
+    const role=card.querySelector("#pf-role").value.trim();
+    const base=Math.max(0,parseInt(card.querySelector("#pf-base").value)||0);
+    const push=Math.max(0,parseInt(card.querySelector("#pf-push").value)||0);
+    if(!label){ card.querySelector("#pf-label").focus(); toast("Name required"); return; }
+    if(!state.pillars) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
+    if(editingPillarKey){
+      const idx=state.pillars.findIndex(p=>p.key===editingPillarKey);
+      if(idx>=0) state.pillars[idx]={...state.pillars[idx],label,role,color:draftColor,types:[...draftTypes],base,push};
+      toast(`"${label}" updated`);
+    } else {
+      state.pillars.push({key:"pl_"+Math.random().toString(36).slice(2,8),label,role,color:draftColor,types:[...draftTypes],base,push});
+      toast(`"${label}" added`);
+    }
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+    renderPillarModal(); renderBoard(); scheduleSave();
+  });
+
+  document.getElementById("pilModal").addEventListener("click",e=>{
+    if(e.target===document.getElementById("pilModal")) closePillarModal();
+  },{once:true});
+}
+
 /* ---------- boot ---------- */
 function syncUI(){
-  if(!TARGETS[state.volume]) state.volume="base"; // migrate old lean/full saves
+  if(!["base","push"].includes(state.volume)) state.volume="base";
+  if(!state.pillars||!state.pillars.length) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
   document.getElementById("weekIn").value=state.week||"";
   document.querySelectorAll("#volToggle button").forEach(x=>x.classList.toggle("on",x.dataset.vol===state.volume));
 }
@@ -532,11 +741,12 @@ function bootLocal(){
   renderBoard();
 }
 function hydrate(remote){
-  if(remote && Array.isArray(remote.pieces)){
-    state = remote;
-    const maxN = state.pieces.reduce((m,p)=>{const n=parseInt((p.id||"").replace(/\D/g,""))||0;return Math.max(m,n);},0);
-    nextId = maxN+1;
+  if(remote&&Array.isArray(remote.pieces)){
+    state=remote;
+    const maxN=state.pieces.reduce((m,p)=>{const n=parseInt((p.id||"").replace(/\D/g,""))||0;return Math.max(m,n);},0);
+    nextId=maxN+1;
   }
+  if(!state.pillars||!state.pillars.length) state.pillars=DEFAULT_PILLARS.map(p=>({...p,types:[...p.types]}));
   syncUI();
   renderBoard();
 }
