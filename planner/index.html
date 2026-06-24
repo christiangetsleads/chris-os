@@ -563,7 +563,7 @@ function download(name,content,mime){
 }
 
 /* ---------- pillar manager ---------- */
-let editingPillarKey=null, draftTypes=[], draftColor=PALETTE[0];
+let editingPillarKey=null, draftTypes=[], draftColor=PALETTE[0], pilFormOpen=false;
 
 function openPillarModal(editKey){
   if(editKey){
@@ -571,8 +571,9 @@ function openPillarModal(editKey){
     const p=getPillar(editKey);
     draftTypes=[...(p.types||[])];
     draftColor=p.color||PALETTE[0];
+    pilFormOpen=true;
   } else {
-    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false;
   }
   renderPillarModal();
   document.getElementById("pilModal").classList.add("on");
@@ -580,7 +581,7 @@ function openPillarModal(editKey){
 
 function closePillarModal(){
   document.getElementById("pilModal").classList.remove("on");
-  editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+  editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false;
 }
 
 function renderPillarModal(){
@@ -609,14 +610,9 @@ function renderPillarModal(){
   const isEdit=!!editingPillarKey;
   const editP=isEdit?getPillar(editingPillarKey):null;
 
-  card.innerHTML=`
-    <div class="pil-hd">
-      <h2>Manage Pillars</h2>
-      <button class="pil-close-btn" id="pilCloseBtn">✕</button>
-    </div>
-    <div class="pil-list">${pilRows}</div>
+  const formHtml = pilFormOpen ? `
     <hr class="pil-divider">
-    <div class="pil-form-title">${isEdit?"EDIT PILLAR":"ADD PILLAR"}</div>
+    <div class="pil-form-title">${isEdit?"EDIT PILLAR":"NEW PILLAR"}</div>
     <div class="pil-form-row">
       <div class="field"><label>Name</label><input class="txt" id="pf-label" value="${escapeAttr(editP?editP.label:"")}" placeholder="e.g. Business" maxlength="32"></div>
       <div class="field"><label>Role</label><input class="txt" id="pf-role" value="${escapeAttr(editP?editP.role:"")}" placeholder="e.g. Strategy" maxlength="32"></div>
@@ -638,19 +634,33 @@ function renderPillarModal(){
       <div class="field"><label>Push target / wk</label><input class="tgt-inp" type="number" id="pf-push" value="${editP!=null?(editP.push??3):3}" min="0" max="99"></div>
     </div>
     <div class="pil-form-btns">
-      <button class="btn ghost" id="pf-cancel">${isEdit?"Cancel edit":"Clear"}</button>
+      <button class="btn ghost" id="pf-cancel">Cancel</button>
       <button class="btn primary" id="pf-save">${isEdit?"Save changes":"Add Pillar"}</button>
     </div>
+  ` : `<button class="btn" id="pf-new" style="width:100%;margin-top:4px">+ New Pillar</button>`;
+
+  card.innerHTML=`
+    <div class="pil-hd">
+      <h2>Manage Pillars</h2>
+      <button class="pil-close-btn" id="pilCloseBtn">✕</button>
+    </div>
+    <div class="pil-list">${pilRows}</div>
+    ${formHtml}
   `;
 
   card.querySelector("#pilCloseBtn").addEventListener("click",closePillarModal);
 
+  if(!pilFormOpen){
+    card.querySelector("#pf-new").addEventListener("click",()=>{ pilFormOpen=true; renderPillarModal(); card.querySelector("#pf-label")?.focus(); });
+  }
+
   card.querySelectorAll("[data-pil-edit]").forEach(btn=>{
     btn.addEventListener("click",()=>{
       const key=btn.dataset.pilEdit;
-      if(editingPillarKey===key){ editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; }
-      else { editingPillarKey=key; const p=getPillar(key); draftTypes=[...(p.types||[])]; draftColor=p.color||PALETTE[0]; }
+      if(editingPillarKey===key){ editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false; }
+      else { editingPillarKey=key; const p=getPillar(key); draftTypes=[...(p.types||[])]; draftColor=p.color||PALETTE[0]; pilFormOpen=true; }
       renderPillarModal();
+      if(pilFormOpen) card.querySelector("#pf-label")?.focus();
     });
   });
 
@@ -700,7 +710,7 @@ function renderPillarModal(){
   typeIn.addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();addType();} });
 
   card.querySelector("#pf-cancel").addEventListener("click",()=>{
-    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; renderPillarModal();
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false; renderPillarModal();
   });
 
   card.querySelector("#pf-save").addEventListener("click",()=>{
@@ -718,7 +728,7 @@ function renderPillarModal(){
       state.pillars.push({key:"pl_"+Math.random().toString(36).slice(2,8),label,role,color:draftColor,types:[...draftTypes],base,push});
       toast(`"${label}" added`);
     }
-    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0];
+    editingPillarKey=null; draftTypes=[]; draftColor=PALETTE[0]; pilFormOpen=false;
     renderPillarModal(); renderBoard(); scheduleSave();
   });
 
