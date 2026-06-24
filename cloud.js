@@ -51,6 +51,7 @@ else if (CONFIGURED) {
     () => { if (signInHandler) signInHandler(); },
     isIOSStandalone ? () => { gate.hide(); app.bootLocal(); } : null
   );
+  window.CGLGate = gate; // expose so the SIGN IN chip in the header can re-open it
   gate.show();
   bootCloud(gate).catch((err) => {
     console.error("[cloud] init failed, falling back to local:", err);
@@ -163,15 +164,10 @@ async function bootCloud(gate) {
   }
 }
 
-/* ---------- signed-in user chip (avatar + sign-out button) ---------- */
+/* ---------- signed-in user chip (avatar + sign-out, or sign-in button) ---------- */
 function updateUserChip(user) {
   const el = document.getElementById('cgl-user');
   if (!el) return;
-  if (!user) {
-    el.style.display = 'none';
-    el.innerHTML = '';
-    return;
-  }
   if (!document.getElementById('cgl-chip-style')) {
     const s = document.createElement('style');
     s.id = 'cgl-chip-style';
@@ -180,8 +176,21 @@ function updateUserChip(user) {
       .cgl-avatar{width:22px;height:22px;border-radius:50%;background:var(--gold,#E6B84D);color:#0A0C11;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0;}
       .cgl-signout{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#7E8597);padding:3px 8px;border:1px solid rgba(230,184,77,.2);border-radius:5px;cursor:pointer;background:transparent;transition:color .15s,border-color .15s;}
       .cgl-signout:hover{color:var(--coral,#FF7A52);border-color:var(--coral,#FF7A52);}
+      .cgl-signin-chip{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#7E8597);padding:3px 8px;border:1px solid rgba(52,214,208,.2);border-radius:5px;cursor:pointer;background:transparent;transition:color .15s,border-color .15s;}
+      .cgl-signin-chip:hover{color:var(--cyan,#34D6D0);border-color:var(--cyan,#34D6D0);}
     `;
     document.head.appendChild(s);
+  }
+  if (!user) {
+    // Not signed in — show a SIGN IN button so the gate can always be re-opened
+    if (window.CGLGate) {
+      el.style.display = '';
+      el.innerHTML = `<button class="cgl-signin-chip" onclick="window.CGLGate&&window.CGLGate.show()">SIGN IN</button>`;
+    } else {
+      el.style.display = 'none';
+      el.innerHTML = '';
+    }
+    return;
   }
   const initial = (user.displayName || user.email || '?')[0].toUpperCase();
   el.style.display = '';
