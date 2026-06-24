@@ -141,10 +141,15 @@ async function bootCloud(gate) {
 
   function onSignInClick() {
     gate.setBusy(true);
-    // Try popup first — works on iOS 16.4+ standalone and all desktop browsers.
-    // If popup is blocked/unsupported, fall back to redirect. On iOS the redirect
-    // stays within the PWA WKWebView because authDomain is chris-os.com and the
-    // SW proxies /__/auth/* to Firebase Hosting's real handler.
+    if (isIOSStandalone) {
+      // On iOS PWA, signInWithPopup opens a new Safari tab. Safari tabs can't
+      // postMessage back to the PWA WKWebView, so the result is never delivered.
+      // Use redirect instead — the whole chain stays in the same WKWebView
+      // (PWA → firebaseapp.com → accounts.google.com → firebaseapp.com → back
+      // to chris-os.com), so getRedirectResult() picks it up on return.
+      signInWithRedirect(auth, provider);
+      return;
+    }
     signInWithPopup(auth, provider).catch((err) => {
       if (
         err && (err.code === "auth/popup-blocked" ||
