@@ -1,4 +1,4 @@
-const CACHE = 'chris-os-v5';
+const CACHE = 'chris-os-v6';
 const ASSETS = [
   '/', '/routine/', '/planner/', '/playbook/',
   '/cloud.js', '/manifest.json', '/icon.svg', '/icon-180.png', '/icon-512.png'
