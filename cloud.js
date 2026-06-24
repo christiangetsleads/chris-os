@@ -112,9 +112,11 @@ async function bootCloud(gate) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       gate.show();
+      updateUserChip(null);
       return;
     }
     gate.hide();
+    updateUserChip(user);
     if (app.gateOnly) return;       // homepage: just reveal the deck, nothing to sync
     if (booted) return;             // ignore token refreshes after first boot
     booted = true;
@@ -152,6 +154,31 @@ async function bootCloud(gate) {
       }
     });
   }
+}
+
+/* ---------- signed-in user chip (avatar + sign-out button) ---------- */
+function updateUserChip(user) {
+  const el = document.getElementById('cgl-user');
+  if (!el) return;
+  if (!user) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  if (!document.getElementById('cgl-chip-style')) {
+    const s = document.createElement('style');
+    s.id = 'cgl-chip-style';
+    s.textContent = `
+      #cgl-user{display:inline-flex;align-items:center;gap:8px;font-family:"Space Mono",monospace;}
+      .cgl-avatar{width:22px;height:22px;border-radius:50%;background:var(--gold,#E6B84D);color:#0A0C11;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0;}
+      .cgl-signout{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#7E8597);padding:3px 8px;border:1px solid rgba(230,184,77,.2);border-radius:5px;cursor:pointer;background:transparent;transition:color .15s,border-color .15s;}
+      .cgl-signout:hover{color:var(--coral,#FF7A52);border-color:var(--coral,#FF7A52);}
+    `;
+    document.head.appendChild(s);
+  }
+  const initial = (user.displayName || user.email || '?')[0].toUpperCase();
+  el.style.display = '';
+  el.innerHTML = `<span class="cgl-avatar" title="${user.email || ''}">${initial}</span><button class="cgl-signout" onclick="window.CGLCloud&&window.CGLCloud.signOut()">SIGN OUT</button>`;
 }
 
 /* ---------- login gate UI (injected, matches CHRIS·OS HUD look) ---------- */
