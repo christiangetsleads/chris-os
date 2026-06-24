@@ -21,7 +21,7 @@ const isIOSStandalone = !!window.navigator.standalone;
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDcP0QmPEW1F5Dsz-Fw9yRlwNRvbydqqmE",
-  authDomain: "chris-os-web.firebaseapp.com",
+  authDomain: "chris-os.com",
   projectId: "chris-os-web",
   storageBucket: "chris-os-web.firebasestorage.app",
   messagingSenderId: "938683267571",
